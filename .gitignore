@@ -456,3 +456,5 @@ _deps
 # Leave debugger alone!
 !debugger/
 !debugger/**
+
+build/loaderpkg
