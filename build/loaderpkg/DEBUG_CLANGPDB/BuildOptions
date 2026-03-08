@@ -1,3 +1,0 @@
-gCommandLineDefines: {'WIN_HOST_BUILD': 'TRUE', 'ARCH': 'X64'}
-BuildOptionPcd: []
-Active Platform: C:\github\OS64\bootloader\uefi\loaderpkg\loaderpkg.dsc
