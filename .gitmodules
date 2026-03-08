@@ -6,4 +6,4 @@
 	url = https://github.com/MatGai/Edk2Pkg
 [submodule "external/edk2"]
 	path = external/edk2
-	url = https://github.com/MatGai/Edk2Pkg
+	url = https://github.com/tianocore/edk2.git
