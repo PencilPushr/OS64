@@ -1,13 +1,18 @@
 # OS64 - Custom UEFI Bootloader \& Kernel
 
-A minimal operating system with custom UEFI headers written from the UEFI specification.
+This is a minimal operating system that is broken down by branch for different approachs and learning objectives:
+
+- edk2: Using the UEFI headers built by edk2. Focusing on getting a working and useful kernel going.
+- gnu-efi-custom: Custom UEFI headers written from the UEFI specification. Using the gnu-efi crt0 and general infrastructure.
+- legacy: Writing the bootloader in assembly. Just as God intended.
 
 ## What This Is
 
-This project demonstrates:
-- Custom UEFI type definitions and protocol structures (currently no EDK2 dependency, working towards also introducing Legacy BIOS bootloader)
+This project demonstrates, depending on the branch:
+- Understanding of the EDK2 API and UEFI boot process. (edk2)
+- Custom UEFI type definitions and protocol structures (currently no EDK2 dependency, working towards also introducing Legacy BIOS bootloader) (legacy + gnu-efi-custom)
 - A UEFI bootloader that loads a kernel and passes boot information
-- A minimal kernel that draws to the framebuffer
+- A minimal kernel that draws to the framebuffer (soon)
 
 We could approach Legacy BIOS by either performing compile time operations or detecting whether EFI could be supported or not:
 
