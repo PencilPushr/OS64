@@ -443,3 +443,16 @@ install_manifest.txt
 compile_commands.json
 CTestTestfile.cmake
 _deps
+
+# IDA outputs
+*.id0
+*.id1
+*.id2
+*.nam
+*.til
+*.idb
+*.i64
+
+# Leave debugger alone!
+!debugger/
+!debugger/**
