@@ -1,5 +1,5 @@
-#ifndef EFI_EFI_H
-#define EFI_EFI_H
+#ifndef BL_EFI_BOOT_H
+#define BL_EFI_BOOT_H
 
 #include <Uefi.h>
 #include <Library/UefiLib.h>
@@ -14,7 +14,8 @@
 #include <IndustryStandard/PeImage.h>
 #include <Guid/GlobalVariable.h>
 #include <Guid/Acpi.h>
-#include <Library/ShellLib.h>
+#include <Guid/FileInfo.h>
+#include <Protocol/Shell.h>
+#include <Protocol/ShellParameters.h>
 
-
-#endif // !EFI_EFI_H
+#endif

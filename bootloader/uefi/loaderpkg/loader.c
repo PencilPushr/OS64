@@ -1,6 +1,4 @@
-#include <Uefi.h>
-#include <Library/UefiApplicationEntryPoint.h>
-#include <Library/UefiLib.h>
+#include "../include/filesystem.h"
 
 EFI_STATUS
 EFIAPI
@@ -10,6 +8,10 @@ UefiMain (
 )
 {
     Print(L"Hello from OS64 loader\r\n");
+
+    BlEfiInitFileSystem();
+    BlListAllFiles();
+
     for( ;; )
     {
         asm ( "hlt" );

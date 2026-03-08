@@ -1,0 +1,10 @@
+C:\github\OS64\bootloader\uefi\loaderpkg\loaderpkg.dec
+C:\github\OS64\bootloader\uefi\loaderpkg\loaderpkg.dsc
+C:\github\OS64\build\loaderpkg\DEBUG_CLANGPDB\BuildOptions
+C:\github\OS64\build\loaderpkg\DEBUG_CLANGPDB\PcdTokenNumber
+C:\github\OS64\build\loaderpkg\DEBUG_CLANGPDB\X64\TOOLS_DEF.X64
+C:\github\OS64\external\edk2\Conf\build_rule.txt
+C:\github\OS64\external\edk2\Conf\tools_def.txt
+C:\github\OS64\external\edk2\MdeModulePkg\MdeModulePkg.dec
+C:\github\OS64\external\edk2\MdePkg\MdeLibs.dsc.inc
+C:\github\OS64\external\edk2\MdePkg\MdePkg.dec
