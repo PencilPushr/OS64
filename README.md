@@ -6,6 +6,8 @@ This is a minimal operating system that is broken down by branch for different a
 - gnu-efi-custom: Custom UEFI headers written from the UEFI specification. Using the gnu-efi crt0 and general infrastructure.
 - legacy: Writing the bootloader in assembly. Just as God intended.
 
+You will find these in their appropriate branches!
+
 ## What This Is
 
 This project demonstrates, depending on the branch:
