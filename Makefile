@@ -1,22 +1,50 @@
-# Top-level Makefile
+ARCH ?= x86_64
 
-.PHONY: all run clean
+OUT_DIR := out
+OUT_EFI_BOOT := $(OUT_DIR)/efi/boot
+OUT_OS64 := $(OUT_DIR)/efi/os64
 
-all:
-	$(MAKE) -C bootloader
+BOOTLOADER_BUILD_DIR := bootloader/build
+
+OVMF_CODE := $(abspath external/ovmf/OVMF_CODE_4M.fd)
+OVMF_VARS := $(abspath external/ovmf/OVMF_VARS_4M.fd)
+
+.PHONY: all gnuefi bootloader kernel stage run clean
+
+all: clean stage
+
+gnuefi:
+	$(MAKE) -C external/gnu-efi ARCH=$(ARCH)
+
+bootloader: gnuefi
+	mkdir -p $(BOOTLOADER_BUILD_DIR)
+	$(MAKE) -C $(BOOTLOADER_BUILD_DIR) \
+		-f ../Makefile \
+		ARCH=$(ARCH) \
+		BINDIR=../bin
+kernel:
 	$(MAKE) -C kernel
-	mkdir -p esp/EFI/BOOT
-	cp bootloader/BOOTX64.EFI esp/EFI/BOOT/
-	cp kernel/kernel.bin esp/EFI/BOOT/
 
-run: all
+
+# Per spec -- https://uefi.org/sites/default/files/resources/UEFI%202_5.pdf#page=587 -- 
+# Boot file should be located in /efi/boot/ , while os specific loaders to be located under /efi/
+stage: bootloader kernel
+	mkdir -p $(OUT_EFI_BOOT)
+	mkdir -p $(OUT_OS64)
+	cp bootloader/bin/bootx64.efi $(OUT_EFI_BOOT)/
+	cp kernel/bin/kernel.elf $(OUT_OS64)/
+
+run: stage
+	cp $(OVMF_VARS) $(OUT_DIR)/OVMF_VARS_4M.fd
 	qemu-system-x86_64 \
-		-bios /usr/share/ovmf/OVMF.fd \
-		-drive format=raw,file=fat:rw:esp \
-		-m 256M \
+		-drive if=pflash,format=raw,readonly=on,file=$(OVMF_CODE) \
+		-drive if=pflash,format=raw,file=$(OUT_DIR)/OVMF_VARS_4M.fd \
+		-drive format=raw,file=fat:rw:$(OUT_DIR) \
+		-m 1024M \
 		-net none
 
 clean:
-	$(MAKE) -C bootloader clean
+	rm -rf $(OUT_DIR)
+	rm -rf bootloader/build bootloader/bin
 	$(MAKE) -C kernel clean
-	rm -rf esp
+	$(MAKE) -C external/gnu-efi clean

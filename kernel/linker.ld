@@ -1,6 +1,6 @@
 /* kernel/linker.ld */
 /* Load kernel at 1MB (0x100000) */
-ENTRY(kernel_main)
+ENTRY(kmain)
 
 SECTIONS {
     . = 0x100000;

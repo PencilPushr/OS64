@@ -1,60 +1,50 @@
-# bootloader/Makefile
-# 
-# We use:
-#   - Our own headers (../efi/)
-#   - gnu-efi's crt0, linker script, and uefi_call_wrapper (from libgnuefi)
-#
-# The result is a PE32+ EFI application that UEFI firmware can load.
+MAKEFILE_DIR := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 
-CC = gcc
-LD = ld
-OBJCOPY = objcopy
+SRCDIR ?= $(MAKEFILE_DIR)
+VPATH  ?= $(SRCDIR)/src
 
-# Our headers, no gnu-efi headers needed!
-CFLAGS = -I.. \
-         -ffreestanding \
-         -fno-stack-protector \
-         -fpic \
-         -fshort-wchar \
-         -mno-red-zone \
-         -Wall -Wextra
+TOPDIR ?= $(abspath $(MAKEFILE_DIR)/../external/gnu-efi)
+ARCH   ?= x86_64
+BINDIR ?= $(SRCDIR)/bin
 
-# Link with gnu-efi infrastructure
-# - crt0-efi-x86_64.o: Entry point that calls efi_main
-# - libgnuefi.a: Contains _relocate and uefi_call_wrapper
-# - elf_x86_64_efi.lds: Linker script for EFI PE format
-LDFLAGS = -nostdlib \
-          -T /usr/lib/elf_x86_64_efi.lds \
-          -shared \
-          -Bsymbolic \
-          /usr/lib/crt0-efi-x86_64.o \
-          -L /usr/lib \
-          -lgnuefi
+include $(TOPDIR)/Make.defaults
 
-.PHONY: all clean
+INCDIR += -I$(SRCDIR)/include \
+          -I$(abspath $(SRCDIR)/../common/include)
 
-all: BOOTX64.EFI
+EFI_CFLAGS += -ffreestanding \
+              -fno-stack-protector \
+              -fshort-wchar \
+              -Wall -Wextra
 
-main.o: main.c ../efi/efi.h ../common/bootinfo.h
-	$(CC) $(CFLAGS) -c main.c -o main.o
+CRT0_LIBS = -lgnuefi
+CRTOBJS   = $(TOPDIR)/$(ARCH)/gnuefi/crt0-efi-$(ARCH).o
+LDSCRIPT  = $(TOPDIR)/gnuefi/elf_$(ARCH)_efi.lds
 
-bootloader.so: main.o
-	$(LD) -nostdlib \
-	      -T /usr/lib/elf_x86_64_efi.lds \
-	      -shared \
-	      -Bsymbolic \
-	      /usr/lib/crt0-efi-x86_64.o \
-	      main.o \
-	      -L /usr/lib \
-	      -lgnuefi \
-	      -o bootloader.so
+EFI_LDFLAGS += -L$(TOPDIR)/$(ARCH)/lib \
+               -L$(TOPDIR)/$(ARCH)/gnuefi \
+               $(CRTOBJS) \
+               -pie -Bsymbolic --no-dynamic-linker
 
-# Convert ELF shared object to PE32+ EFI application
-BOOTX64.EFI: bootloader.so
-	$(OBJCOPY) -j .text -j .sdata -j .data -j .dynamic -j .dynsym \
-	           -j .rel -j .rela -j .reloc \
-	           --target=efi-app-x86_64 \
-	           bootloader.so BOOTX64.EFI
+LOADLIBES += -T $(LDSCRIPT) -lefi $(CRT0_LIBS) $(LIBGCC)
+
+SUBSYSTEM := 0xa
+FORMAT := -O efi-app-$(ARCH)
+
+TARGETS = bootloader.efi
+
+.PHONY: all clean dirs
+
+all: dirs $(TARGETS) $(BINDIR)/bootx64.efi
+
+dirs:
+	mkdir -p $(BINDIR)
+
+$(BINDIR)/bootx64.efi: bootloader.efi | dirs
+	cp $< $@
 
 clean:
-	rm -f *.o *.so *.EFI
+	rm -f *~ *.o *.so *.efi *.efi.debug
+	rm -rf $(BINDIR)
+
+include $(TOPDIR)/Make.rules
