@@ -19,4 +19,4 @@ kernel.bin: kernel.elf
 	objcopy -O binary kernel.elf kernel.bin
 
 clean:
-	rm -f *.o *.elf *.bi
+	rm -f *.o *.elf *.bin
