@@ -25,8 +25,7 @@ bootloader: gnuefi
 kernel:
 	$(MAKE) -C kernel
 
-
-# Per spec -- https://uefi.org/sites/default/files/resources/UEFI%202_5.pdf#page=587 -- 
+# Per spec -- https://uefi.org/sites/default/files/resources/UEFI%202_5.pdf#page=587 
 # Boot file should be located in /efi/boot/ , while os specific loaders to be located under /efi/
 stage: bootloader kernel
 	mkdir -p $(OUT_EFI_BOOT)
