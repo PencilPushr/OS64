@@ -20,7 +20,7 @@ EFI_OS64 := $(OUT)/efi/os64
 
 QEMU_FLAGS := \
 	-drive if=pflash,format=raw,readonly=on,file=$(OVMF_DIR)/OVMF_CODE_4M.fd \
-	-drive if=pflash,format=raw,file=$(OUT)/OVMF_VARS_4M.fd \
+	-drive if=pflash,format=raw,file=$(OVMF_DIR)/OVMF_VARS_4M.fd \
 	-drive format=raw,file=fat:rw:$(OUT) \
 	-m 1024M \
 	-net none
@@ -37,12 +37,10 @@ setup:
 bootloader:
 	@test -f $(GNUEFI_LIB)/libefi.a || \
 		{ echo "Run 'make setup' first"; exit 1; }
-	mkdir -p bootloader/build
-	$(MAKE) -C bootloader/build -f ../Makefile \
-		ARCH=$(ARCH) \
-		GNUEFI_LIB=$(GNUEFI_LIB) \
-		GNUEFI_INCLUDE=$(GNUEFI_INCLUDE)
-
+	$(MAKE) -C bootloader \
+	    ARCH=$(ARCH) \
+	    TOPDIR=$(GNUEFI)
+		
 kernel:
 	$(MAKE) -C kernel ARCH=$(ARCH)
 

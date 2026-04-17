@@ -1,40 +1,37 @@
 CC := gcc
 OBJCOPY := objcopy
 
-SRCDIR := src
-INCDIR := include
-
-BUILD_DIR := build
-BIN_DIR := bin
-
-CFLAGS := -ffreestanding \
+CFLAGS := -ffreestanding 	   \
           -fno-stack-protector \
-          -mno-red-zone \
-          -nostdlib \
-          -Wall -Wextra \
-          -I$(INCDIR) \
+          -mno-red-zone 	   \
+          -nostdlib 	       \
+          -Wall -Wextra 	   \
+          -I$(INCDIR) 		   \
           -I../common/include
 
 LDFLAGS := -T linker.ld -nostdlib -Wl,--build-id=none
 
 .PHONY: all clean
 
-all: $(BIN_DIR)/kernel.elf $(BIN_DIR)/kernel.bin
+all: bin/kernel.elf bin/kernel.bin
 
-$(BUILD_DIR):
-	mkdir -p $(BUILD_DIR)
+build: 
+	mkdir -p build
 
-$(BIN_DIR):
-	mkdir -p $(BIN_DIR)
+bin:
+	mkdir -p bin
 
-$(BUILD_DIR)/kmain.o: $(SRCDIR)/kmain.c ../common/include/common/bootinfo.h | $(BUILD_DIR)
+build/kmain.o: \
+	src/kmain.c ../common/include/common/bootinfo.h | build
 	$(CC) $(CFLAGS) -c $< -o $@
 
-$(BIN_DIR)/kernel.elf: $(BUILD_DIR)/kmain.o linker.ld | $(BIN_DIR)
-	$(CC) $(LDFLAGS) $(BUILD_DIR)/kmain.o -o $@
+bin/kernel.elf: \
+	build/kmain.o linker.ld | bin
+	$(CC) $(LDFLAGS) build/kmain.o -o $@
 
-$(BIN_DIR)/kernel.bin: $(BIN_DIR)/kernel.elf | $(BIN_DIR)
+bin/kernel.bin: \
+	bin/kernel.elf | bin
 	$(OBJCOPY) -O binary $< $@
 
 clean:
-	rm -rf $(BUILD_DIR) $(BIN_DIR)
+	rm -rf build bin
