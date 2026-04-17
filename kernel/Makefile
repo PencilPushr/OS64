@@ -10,7 +10,6 @@ CFLAGS := -ffreestanding 	   \
           -mno-red-zone 	   \
           -nostdlib 	       \
           -Wall -Wextra 	   \
-          -I$(INCDIR) 		   \
           -I../common/include
 
 LDFLAGS := -T linker.ld -nostdlib -Wl,--build-id=none

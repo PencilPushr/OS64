@@ -1,37 +1,16 @@
-#include <bootloader/file.h>
+#include <efi.h>
+#include <efilib.h>
 
 EFI_STATUS
-efi_main(
-    IN EFI_HANDLE ImageHandle, 
-    IN EFI_SYSTEM_TABLE *SystemTable
-)
+EFIAPI
+efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable)
 {
-    InitializeLib(ImageHandle, SystemTable);
 
-    Print(L"Hello from OS64 bootloader\r\n");
+    InitializeLib( ImageHandle, SystemTable );
 
-    EFI_LOADED_IMAGE* LoadedImage = NULL; 
-    EFI_FILE_HANDLE RootFileHandle;
-    EFI_STATUS Status = EFI_SUCCESS;
+    Print( (const CHAR16*)"Hello bootloader\n" );
 
-    // TODO: Use new file/common functions
-
-    Status = uefi_call_wrapper( BS->HandleProtocol, 3, ImageHandle, &LoadedImageProtocol, (VOID**)&LoadedImage );
-    if( EFI_ERROR( Status ) )
-    {
-        Print( L"[%r] Could not get loaded image\n", Status );
-    }
-
-    RootFileHandle = LibOpenRoot( LoadedImage->DeviceHandle );
-    if ( RootFileHandle == NULL )
-    {
-        Print( L"Failed to find root file handle\n" );
-    }
-
-    while( 1 )
-    {
-        continue;
-    }
+    for( ;; );
 
     return EFI_SUCCESS;
 }

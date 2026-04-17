@@ -22,8 +22,11 @@ QEMU_FLAGS := \
 	-drive if=pflash,format=raw,readonly=on,file=$(OVMF_DIR)/OVMF_CODE_4M.fd \
 	-drive if=pflash,format=raw,file=$(OVMF_DIR)/OVMF_VARS_4M.fd \
 	-drive format=raw,file=fat:rw:$(OUT) \
-	-m 1024M \
-	-net none
+	-drive file=$(OVMF_DIR)/UefiShell.iso,format=raw \
+	-m 2048M \
+	-net none \
+	-d int \
+	-D $(OVMF_DIR)/dbg.log 
 
 # --- targets ---
 
@@ -51,10 +54,15 @@ stage: bootloader kernel
 	cp bootloader/bin/bootx64.efi $(EFI_BOOT)/
 	cp kernel/bin/kernel.elf $(EFI_OS64)/
 
+
 run: stage
-	cp $(OVMF_DIR)/OVMF_VARS_4M.fd $(OUT)/
+	mkdir -p $(OUT)
+	cp -f $(OVMF_DIR)/OVMF_VARS_4M.fd $(OUT)/OVMF_VARS_4M.fd
 	qemu-system-x86_64 $(QEMU_FLAGS)
 
 clean:
 	rm -rf $(OUT) bootloader/build bootloader/bin
 	$(MAKE) -C kernel clean
+
+cclean: clean
+	$(MAKE) -C $(GNUEFI) ARCH=$(ARCH) clean

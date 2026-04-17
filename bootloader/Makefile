@@ -1,80 +1,46 @@
-# Bootloader Makefile
+MAKEFILE_DIR := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
+SRCDIR       := $(MAKEFILE_DIR)
 
+TOPDIR ?= $(abspath $(MAKEFILE_DIR)/../external/gnu-efi)
 ARCH   ?= x86_64
 
-# --- toolchain ---
+include $(TOPDIR)/Make.defaults
 
-TOPDIR ?= $(abspath external/gnu-efi)
+INCDIR += -I$(SRCDIR)/include \
+          -I$(abspath $(SRCDIR)/../common/include)
 
-CC      ?= gcc 
-LD      ?= ld 
-OBJCOPY ?= objcopy
+override CFLAGS += -fcf-protection=none -mno-shstk
 
-GNU_EFI_INCLUDE :=          \
-	-I$(TOPDIR)/inc         \
-	-I$(TOPDIR)/inc/$(ARCH) \
-	-I$(TOPDIR)/inc/protocol
+CRTOBJS  := $(TOPDIR)/$(ARCH)/gnuefi/crt0-efi-$(ARCH).o
+LDSCRIPT := $(TOPDIR)/gnuefi/elf_$(ARCH)_efi.lds
 
-LOCAL_INCLUDE :=  \
-	-I include    \
-	-I ../common/include
+LIBEFI_A    := $(TOPDIR)/$(ARCH)/lib/libefi.a
+LIBGNUEFI_A := $(TOPDIR)/$(ARCH)/gnuefi/libgnuefi.a
 
-CFLAGS :=                      \
-          $(LOCAL_INCLUDE)     \
-          $(GNU_EFI_INCLUDE)   \
-	      -ffreestanding       \
-	      -fno-stack-protector \
-	      -fpic                \
-	      -fshort-wchar        \
-	      -mno-red-zone        \
-	      -Wall                \
-	      -Wextra 
+override LDFLAGS += -T $(LDSCRIPT) \
+                    -shared \
+                    -Bsymbolic
 
-CRTOBJS   := $(TOPDIR)/$(ARCH)/gnuefi/crt0-efi-$(ARCH).o
-LDSCRIPT  := $(TOPDIR)/gnuefi/elf_$(ARCH)_efi.lds
-LIBDIR    := $(TOPDIR)/$(ARCH)/gnuefi
+LOADLIBES := $(CRTOBJS) $(LIBEFI_A) $(LIBGNUEFI_A) $(LIBGCC)
 
-LDFLAGS := -nostdlib     \
-	      -shared        \
-	      -Bsymbolic     \
-	      -T $(LDSCRIPT) \
-	      $(CRTOBJS)     \
-	      -L$(LIBDIR)    \
-	      -lgnuefi
+.PHONY: all clean dirs
 
-OBJS := build/bootloader.o
+all: dirs bin/bootx64.efi
 
-# --- targets ---
+dirs:
+	mkdir -p build bin
 
-.PHONY: all clean
+build/bootloader.o: $(SRCDIR)/src/bootloader.c | dirs
+	$(CC) $(INCDIR) $(CFLAGS) $(CPPFLAGS) -c $< -o $@
 
-all: bin/bootx64.efi
+build/bootloader.so: build/bootloader.o | dirs
+	$(LD) $(LDFLAGS) $< -o $@ $(LOADLIBES)
 
-build bin:
-	mkdir -p $@
+build/bootloader.efi: build/bootloader.so | dirs
+	$(OBJCOPY) -O efi-app-$(ARCH) $< $@
 
-build/bootloader.o: src/bootloader.c | build
-	$(CC) $(CFLAGS) -c $< -o $@
+bin/bootx64.efi: build/bootloader.efi | dirs
+	cp $< $@
 
-build/bootloader.so: $(OBJS) | build
-	$(LD) $(LDFLAGS) $(OBJS) -o $@
-
-bin/bootx64.efi: build/bootloader.so | bin
-	$(OBJCOPY) \
-		-j .text \
-		-j .sdata \
-		-j .data \
-		-j .dynamic \
-		-j .dynsym \
-		-j .rel \
-		-j .rela \
-		-j .reloc \
-		--target=efi-app-$(ARCH) \
-		$< $@
-
-clean: 
-	rm -f build bin
-
-
-
-
+clean:
+	rm -rf build bin

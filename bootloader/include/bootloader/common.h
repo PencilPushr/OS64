@@ -1,7 +1,7 @@
 #ifndef BOOTLOADER_COMMON_H
 #define BOOTLOADER_COMMON_H
 
-#include <boot.h>
+#include <bootloader/boot.h>
 
 /***
  * Retrieves the loaded image descriptor through the image handle.
