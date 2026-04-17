@@ -3,14 +3,14 @@
 
 #include <bootloader/boot.h>
 
-BOOLEAN 
-BlEfiInitialiseFileSystem (
+EFI_STATUS  
+BlFsInitialiseFileSystem (
     IN  EFI_HANDLE         EfiImageHandle,
     OUT EFI_LOADED_IMAGE*  LoadedImage
 );
 
-BOOLEAN
-BlEfiOpenFile (
+EFI_STATUS 
+BlFsOpenFile (
     IN  EFI_FILE_HANDLE VolumeHandle,
     OUT EFI_FILE_HANDLE FileHandle,
     IN  UINT64          OpenMode,

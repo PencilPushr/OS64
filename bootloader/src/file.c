@@ -1,73 +1,46 @@
 #include <bootloader/file.h>
 
-inline
-VOID 
-BlSetErrorReason ( 
-    IN OUT EFI_STATUS* Status,
-    IN     EFI_STATUS  Reason
-)
-{
-    if( Status != NULL )
-    {
-        *Status = Reason;
-    }
-}
 
-BOOLEAN 
-BlEfiInitialiseFileSystem (
-    IN  EFI_HANDLE         ImageHandle,
-    OUT EFI_LOADED_IMAGE*  LoadedImage,
-    OUT EFI_FILE_HANDLE    VolumeHandle,
-    OUT EFI_STATUS*        ErrorReason OPTIONAL
+EFI_STATUS 
+BlFsInitialiseFileSystem (
+    IN  EFI_HANDLE        ImageHandle,
+    IN  EFI_LOADED_IMAGE* LoadedImage,
+    OUT EFI_FILE_HANDLE   VolumeHandle
 )
 {
-    if ( ImageHandle == NULL || LoadedImage == NULL )
+    if ( LoadedImage == NULL )
     {
-        BlSetErrorReason( ErrorReason, EFI_INVALID_PARAMETER );
+        return EFI_INVALID_PARAMETER;
     }
 
     EFI_STATUS             Status = EFI_SUCCESS;
     EFI_FILE_IO_INTERFACE* Volume = NULL;
 
-    //
-    // Per spec -- 
-    // Perform a call to locate the loaded image handle, required for extras such as file handles
-    //
+    // Per spec -- https://uefi.org/specs/UEFI/2.10/07_Services_Boot_Services.html?highlight=handleprotocol#efi-boot-services-handleprotocol
+    // File the file system interface to the device, through the newer 'OpenProtocol'. 'HandleProtocol' is depreciated.
 
-    Status = uefi_call_wrapper( BS->HandleProtocol, 3, ImageHandle, &LoadedImageProtocol, (VOID**)&LoadedImage );
-    if ( EFI_ERROR( Status ) || LoadedImage == NULL )
-    {
-        BlSetErrorReason( ErrorReason, Status );
-        return FALSE;
-    }
-
-    //
-    // File the file system interface to the device
-    //
-
-    Status = uefi_call_wrapper( BS->HandleProtocol, 3, LoadedImage->DeviceHandle, &FileSystemProtocol, (VOID*)&Volume );
+    // Status = uefi_call_wrapper( BS->HandleProtocol, 3, LoadedImage->DeviceHandle, &FileSystemProtocol, (VOID*)&Volume );
+    Status = uefi_call_wrapper( BS->OpenProtocol, 6, 
+        LoadedImage->DeviceHandle, &FileSystemProtocol, (VOID*)&Volume, ImageHandle, NULL, EFI_OPEN_PROTOCOL_BY_HANDLE_PROTOCOL 
+    );
     if( EFI_ERROR( Status ) || Volume == NULL )
     {
-        BlSetErrorReason( ErrorReason, Status );
-        return FALSE;
+        return Status;
     }
 
-    //
     // Open the root directory of the volume 
-    //
 
     Status = uefi_call_wrapper( Volume->OpenVolume, 2, Volume, &VolumeHandle );
     if( EFI_ERROR( Status ) || VolumeHandle == NULL )
     {
-        BlSetErrorReason( ErrorReason, Status );
-        return FALSE;
+        return Status;
     }
 
-    return TRUE;
+    return EFI_SUCCESS;
 }
 
 BOOLEAN
-BlEfiOpenFile(
+BlFsOpenFile(
     IN  EFI_FILE_HANDLE VolumeHandle,
     OUT EFI_FILE_HANDLE FileHandle,
     IN  UINT64          OpenMode,
