@@ -9,19 +9,25 @@ BOOTLOADER_BUILD_DIR := bootloader/build
 OVMF_CODE := $(abspath external/ovmf/OVMF_CODE_4M.fd)
 OVMF_VARS := $(abspath external/ovmf/OVMF_VARS_4M.fd)
 
-.PHONY: all gnuefi bootloader kernel stage run clean
+GNUEFI_DIR = $(abspath external/gnu-efi)
+
+.PHONY: all bootloader kernel stage run clean setup
 
 all: clean stage
 
-gnuefi:
-	$(MAKE) -C external/gnu-efi ARCH=$(ARCH)
+setup:
+	$(MAKE) -C $(GNUEFI_DIR) ARCH=$(ARCH)
 
-bootloader: gnuefi
+bootloader: 
+	@test -f $(GNUEFI_DIR)/$(ARCH)/lib/libefi.a || \
+		{ echo "Run 'make setup' first to build gnu-efi"; exit 1; }
 	mkdir -p $(BOOTLOADER_BUILD_DIR)
 	$(MAKE) -C $(BOOTLOADER_BUILD_DIR) \
 		-f ../Makefile \
 		ARCH=$(ARCH) \
 		BINDIR=../bin
+		GNUEFI_DIR=$(GNUEFI_DIR)
+
 kernel:
 	$(MAKE) -C kernel
 
@@ -46,4 +52,3 @@ clean:
 	rm -rf $(OUT_DIR)
 	rm -rf bootloader/build bootloader/bin
 	$(MAKE) -C kernel clean
-	$(MAKE) -C external/gnu-efi clean
