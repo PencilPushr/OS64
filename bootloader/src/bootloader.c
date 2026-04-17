@@ -14,6 +14,8 @@ efi_main(
     EFI_FILE_HANDLE RootFileHandle;
     EFI_STATUS Status = EFI_SUCCESS;
 
+    // TODO: Use new file/common functions
+
     Status = uefi_call_wrapper( BS->HandleProtocol, 3, ImageHandle, &LoadedImageProtocol, (VOID**)&LoadedImage );
     if( EFI_ERROR( Status ) )
     {
