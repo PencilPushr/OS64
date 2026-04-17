@@ -1,3 +1,7 @@
+# Kernel Makefile
+
+# --- toolchain ---
+
 CC := gcc
 OBJCOPY := objcopy
 
@@ -10,6 +14,8 @@ CFLAGS := -ffreestanding 	   \
           -I../common/include
 
 LDFLAGS := -T linker.ld -nostdlib -Wl,--build-id=none
+
+# --- targets ---
 
 .PHONY: all clean
 

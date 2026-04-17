@@ -1,6 +1,9 @@
 # Bootloader Makefile
 
 ARCH   ?= x86_64
+
+# --- toolchain ---
+
 TOPDIR ?= $(abspath external/gnu-efi)
 
 CC      ?= gcc 
@@ -40,6 +43,8 @@ LDFLAGS := -nostdlib     \
 	      -lgnuefi
 
 OBJS := build/bootloader.o
+
+# --- targets ---
 
 .PHONY: all clean
 
