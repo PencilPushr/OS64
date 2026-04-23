@@ -1,5 +1,5 @@
-#include <bootloader/file.h>
-#include <bootloader/common.h>
+#include "bootloader/file.h"
+#include "bootloader/common.h"
 
 EFI_STATUS
 efi_main(
@@ -16,8 +16,6 @@ efi_main(
 
     EFI_STATUS         Status = EFI_SUCCESS;
     BOOTLOADER_CONTEXT BootloaderContext = { .ImageHandle = ImageHandle };
-
-    // TODO: Use new file/common functions
 
     Status = BlEfiInitialiseLoadedImage( &BootloaderContext );
     if( EFI_ERROR( Status ) )
