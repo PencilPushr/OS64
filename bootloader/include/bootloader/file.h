@@ -1,20 +1,32 @@
 #ifndef BOOTLOADER_FILE_H
 #define BOOTLOADER_FILE_H
 
-#include <bootloader/boot.h>
+#include <bootloader/common.h>
 
 EFI_STATUS  
 BlFsInitialiseFileSystem (
-    IN  EFI_HANDLE         EfiImageHandle,
-    OUT EFI_LOADED_IMAGE*  LoadedImage
+    IN OUT BOOTLOADER_CONTEXT* Context
 );
 
+EFI_STATUS
+BlFsOpenFile(
+    IN  EFI_FILE_HANDLE  Directory,
+    IN  CHAR16*          Path,
+    IN  UINT64           OpenMode,
+    IN  UINT64           OpenAttributes,
+    OUT EFI_FILE_HANDLE* FileHandle
+);
+
+// TODO: Implement
+
 EFI_STATUS 
-BlFsOpenFile (
-    IN  EFI_FILE_HANDLE VolumeHandle,
-    OUT EFI_FILE_HANDLE FileHandle,
-    IN  UINT64          OpenMode,
-    OUT EFI_STATUS*     ErrorReason OPTIONAL
+BlFsFindAndOpenFile( 
+    VOID
+);
+
+EFI_STATUS
+BlFsFindFilePath(
+    VOID
 );
 
 #endif // !BOOTLOADER_FILE_H
