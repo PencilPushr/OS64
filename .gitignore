@@ -64,8 +64,20 @@ bld/
 [Oo]bj/
 [Ll]og/
 [Ll]ogs/
-build/
-bin
+
+# generated build outputs
+**/[Bb]uild/
+**/[Bb]in/
+**/[Oo]ut/
+
+# firmware generated outputs
+*.efi
+*.EFI
+*.fd
+*.FD
+
+!external/ovmf/OVMF_CODE_4M.fd
+!external/ovmf/OVMF_VARS_TEMPLATE_4M.fd
 
 # Visual Studio 2015/2017 cache/options directory
 .vs/
