@@ -80,14 +80,10 @@ BlFsOpenFile(
     );
 }
 
-
-
-
-
 EFI_STATUS
 BlFsGetFileInfo(
     IN     EFI_FILE_HANDLE File, 
-    OUT    EFI_FILE_INFO*  FileInfo
+    OUT    EFI_FILE_INFO** FileInfo
 )
 {
     if( File == NULL ||  FileInfo == NULL )
@@ -95,12 +91,14 @@ BlFsGetFileInfo(
         return EFI_INVALID_PARAMETER;
     }
 
-    EFI_STATUS Status = EFI_SUCCESS;
-
     // Per documentation EFI_FIELD_OFFSET should be used to get the correct size
     // for file info structures. The define uses EFI_FIELD_OFFSET internally.
 
-    UINT64 Size = SIZE_OF_EFI_FILE_INFO;
+    EFI_STATUS     Status = EFI_SUCCESS;
+    UINT64         Size   = SIZE_OF_EFI_FILE_INFO;
+    EFI_FILE_INFO* FsInfo = NULL;
+
+    FsInfo = AllocatePool( Size );
 
     Status = uefi_call_wrapper( 
         File->GetInfo, 
@@ -108,15 +106,39 @@ BlFsGetFileInfo(
         File,   
         &GenericFileInfo,
         &Size,
-        (VOID*)FileInfo
+        FsInfo
     );
-    if( EFI_ERROR( Status ) )
+
+    if (Status == EFI_BUFFER_TOO_SMALL)
     {
+        FreePool( FsInfo );
+
+        FsInfo = NULL;
+        FsInfo = AllocatePool( Size );
+
+        Status = uefi_call_wrapper(
+            File->GetInfo,
+            4,
+            File,
+            &GenericFileInfo,
+            &Size,
+            FsInfo
+        );
+    }
+
+    if (EFI_ERROR(Status))
+    {
+        if (FsInfo != NULL)
+        {
+           FreePool( FsInfo );
+        }
         return Status;
     }
 
+    *FileInfo = FsInfo;
     return EFI_SUCCESS;
 }
+
 EFI_STATUS
 BlFsGetFileSystemInfo(
     IN  EFI_FILE_HANDLE         File,
@@ -130,21 +152,14 @@ BlFsGetFileSystemInfo(
 
     *FileSysInfo = NULL;
 
+    // Per documentation EFI_FIELD_OFFSET should be used to get the correct size
+    // for file info structures. The define uses EFI_FIELD_OFFSET internally.
+
     EFI_STATUS Status;
     UINTN Size = SIZE_OF_EFI_FILE_SYSTEM_INFO;
     EFI_FILE_SYSTEM_INFO* FsInfo = NULL;
 
-    Status = uefi_call_wrapper(
-        BS->AllocatePool,
-        3,
-        EfiLoaderData,
-        Size,
-        (VOID**)&FsInfo
-    );
-    if (EFI_ERROR(Status))
-    {
-        return Status;
-    }
+    FsInfo = AllocatePool( Size );
 
     Status = uefi_call_wrapper(
         File->GetInfo,
@@ -157,20 +172,10 @@ BlFsGetFileSystemInfo(
 
     if (Status == EFI_BUFFER_TOO_SMALL)
     {
-        uefi_call_wrapper(BS->FreePool, 1, FsInfo);
+        FreePool( FsInfo );
+        
         FsInfo = NULL;
-
-        Status = uefi_call_wrapper(
-            BS->AllocatePool,
-            3,
-            EfiLoaderData,
-            Size,
-            (VOID**)&FsInfo
-        );
-        if (EFI_ERROR(Status))
-        {
-            return Status;
-        }
+        FsInfo = AllocatePool( Size );
 
         Status = uefi_call_wrapper(
             File->GetInfo,
@@ -186,7 +191,7 @@ BlFsGetFileSystemInfo(
     {
         if (FsInfo != NULL)
         {
-            uefi_call_wrapper(BS->FreePool, 1, FsInfo);
+           FreePool( FsInfo );
         }
         return Status;
     }
@@ -194,3 +199,16 @@ BlFsGetFileSystemInfo(
     *FileSysInfo = FsInfo;
     return EFI_SUCCESS;
 }
+
+
+// TODO: Implement
+
+//EFI_STATUS 
+//BlFsFindAndOpenFile( 
+//    VOID
+//);
+//
+//EFI_STATUS
+//BlFsFindFilePath(
+//    VOID
+//);
