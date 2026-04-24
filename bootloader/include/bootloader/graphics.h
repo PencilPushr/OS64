@@ -1,7 +1,9 @@
 #ifndef BOOTLOADER_GRAPHICS_H 
 #define BOOTLOADER_GRAPHICS_H
 
-#include "../"
+#include "boot.h"
+#include "stdint.h"
+
 
 
 typedef struct FramebufferInfo 

@@ -5,20 +5,20 @@ BlGfxInitialiseFrameBuffer(
     IN OUT FramebufferInfo* pFramebuffer
 )
 {
-    EFI_GRAPHICS_OUTPUT_PROTOCOL *gop;
-    EFI_GUID gop_guid = EFI_GRAPHICS_OUTPUT_PROTOCOL_GUID;
-    EFI_STATUS status;
+    EFI_GRAPHICS_OUTPUT_PROTOCOL *Gop;
+    EFI_GUID GopGuid = EFI_GRAPHICS_OUTPUT_PROTOCOL_GUID;
+    EFI_Status Status;
 
-    status = uefi_call_wrapper( ST->BootServices->LocateProtocol, 3
-                                &gop_guid, NULL, (VOID **)&gop );
-    if ( EFI_ERROR( status ) )
+    Status = uefi_call_wrapper( ST->BootServices->LocateProtocol, 3
+                                &GopGuid, NULL, (VOID **)&Gop );
+    if ( EFI_ERROR( Status ) )
     {
         Print("ERROR: Failed to locate GOP\n");
-        return status;
+        return Status;
     }
 
     // Setup the masks
-    switch( UefiGop->Mode->Info->PixelFormat )
+    switch( GopGuid->Mode->Info->PixelFormat )
     {
         case PixelRedGreenBlueReserved8BitPerColor:
         {
@@ -40,10 +40,10 @@ BlGfxInitialiseFrameBuffer(
         }
         case PixelBitMask:
         {
-            pFramebuffer->RedMask   = UefiGop->Mode->Info->PixelInformation.RedMask;
-            pFramebuffer->GreenMask = UefiGop->Mode->Info->PixelInformation.GreenMask;
-            pFramebuffer->BlueMask  = UefiGop->Mode->Info->PixelInformation.BlueMask;
-            pFramebuffer->RSVDMaskMask  = UefiGop->Mode->Info->PixelInformation.ReservedMask;
+            pFramebuffer->RedMask   = GopGuid->Mode->Info->PixelInformation.RedMask;
+            pFramebuffer->GreenMask = GopGuid->Mode->Info->PixelInformation.GreenMask;
+            pFramebuffer->BlueMask  = GopGuid->Mode->Info->PixelInformation.BlueMask;
+            pFramebuffer->RSVDMask = GopGuid->Mode->Info->PixelInformation.ReservedMask;
             //Print(L"BitMask\n");
             break;
         }
@@ -55,19 +55,19 @@ BlGfxInitialiseFrameBuffer(
     }
 
     // Store framebuffer info
-    pFramebuffer.Base   = gop->Mode->FrameBufferBase;
-    pFramebuffer.Width  = gop->Mode->Info->HorizontalResolution;
-    pFramebuffer.Height = gop->Mode->Info->VerticalResolution;
-    pFramebuffer.Pitch  = gop->Mode->Info->PixelsPerScanLine * 4;
-    pFramebuffer.Bpp    = 32;
+    pFramebuffer->Base   = Gop->Mode->FrameBufferBase;
+    pFramebuffer->Width  = Gop->Mode->Info->HorizontalResolution;
+    pFramebuffer->Height = Gop->Mode->Info->VerticalResolution;
+    pFramebuffer->Pitch  = Gop->Mode->Info->PixelsPerScanLine * 4;
+    pFramebuffer->Bpp    = 32;
 
-    print("Framebuffer: ");
-    print(pFrameBuffer.Width);
-    print("x");
-    print(pFrameBuffer.Height);
-    print(" @ ");
-    print(pFrameBuffer.Base);
-    print("\n");
+    Print("Framebuffer: ");
+    Print(pFrameBuffer->Width);
+    Print("x");
+    Print(pFrameBuffer->Height);
+    Print(" @ ");
+    Print(pFrameBuffer->Base);
+    Print("\n");
 
     return EFI_SUCCESS;
 

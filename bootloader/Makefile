@@ -1,25 +1,26 @@
-MAKEFILE_DIR := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
-SRCDIR       := $(MAKEFILE_DIR)
+# Bootloader makefile
 
+MAKEFILE_DIR := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 TOPDIR ?= $(abspath $(MAKEFILE_DIR)/../external/gnu-efi)
 ARCH   ?= x86_64
 
 include $(TOPDIR)/Make.defaults
 
-INCDIR += -I$(SRCDIR)/include \
-          -I$(abspath $(SRCDIR)/../common/include)
+SRCDIR := $(MAKEFILE_DIR)/src
 
-override CFLAGS += -fcf-protection=none -mno-shstk
+INCDIR += -I$(MAKEFILE_DIR)/include \
+          -I$(abspath $(MAKEFILE_DIR)/../common/include)
 
-CRTOBJS  := $(TOPDIR)/$(ARCH)/gnuefi/crt0-efi-$(ARCH).o
-LDSCRIPT := $(TOPDIR)/gnuefi/elf_$(ARCH)_efi.lds
+SRCS := $(wildcard $(SRCDIR)/*.c)
+OBJS := $(patsubst $(SRCDIR)/%.c,build/%.o,$(SRCS))
 
+CRTOBJS     := $(TOPDIR)/$(ARCH)/gnuefi/crt0-efi-$(ARCH).o
+LDSCRIPT    := $(TOPDIR)/gnuefi/elf_$(ARCH)_efi.lds
 LIBEFI_A    := $(TOPDIR)/$(ARCH)/lib/libefi.a
 LIBGNUEFI_A := $(TOPDIR)/$(ARCH)/gnuefi/libgnuefi.a
 
-override LDFLAGS += -T $(LDSCRIPT) \
-                    -shared \
-                    -Bsymbolic
+override CFLAGS += -fcf-protection=none -mno-shstk -fshort-wchar
+override LDFLAGS += -nostdlib -znocombreloc -T $(LDSCRIPT) -shared -Bsymbolic
 
 LOADLIBES := $(CRTOBJS) $(LIBEFI_A) $(LIBGNUEFI_A) $(LIBGCC)
 
@@ -28,19 +29,37 @@ LOADLIBES := $(CRTOBJS) $(LIBEFI_A) $(LIBGNUEFI_A) $(LIBGCC)
 all: dirs bin/bootx64.efi
 
 dirs:
-	mkdir -p build bin
+    mkdir -p build bin
 
-build/bootloader.o: $(SRCDIR)/src/bootloader.c | dirs
-	$(CC) $(INCDIR) $(CFLAGS) $(CPPFLAGS) -c $< -o $@
+build/%.o: $(SRCDIR)/%.c | dirs
+    $(CC) $(INCDIR) $(CFLAGS) $(CPPFLAGS) -c $< -o $@
 
-build/bootloader.so: build/bootloader.o | dirs
-	$(LD) $(LDFLAGS) $< -o $@ $(LOADLIBES)
+build/bootloader.so: $(OBJS) | dirs
+    $(LD) $(LDFLAGS) $(OBJS) -o $@ $(LOADLIBES)
 
 build/bootloader.efi: build/bootloader.so | dirs
-	$(OBJCOPY) -O efi-app-$(ARCH) $< $@
+    $(OBJCOPY) \
+        -j .text \
+        -j .text.* \
+        -j .sdata \
+        -j .sdata.* \
+        -j .data \
+        -j .data.* \
+        -j .rodata \
+        -j .rodata.* \
+        -j .dynamic \
+        -j .dynsym \
+        -j .dynstr \
+        -j .rel \
+        -j .rel.* \
+        -j .rela \
+        -j .rela.* \
+        -j .reloc \
+        --target=efi-app-$(ARCH) \
+        $< $@
 
 bin/bootx64.efi: build/bootloader.efi | dirs
-	cp $< $@
+    cp $< $@
 
 clean:
-	rm -rf build bin
+    rm -rf build bin
