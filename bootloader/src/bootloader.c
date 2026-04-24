@@ -49,7 +49,7 @@ efi_main(
 
     EFI_FILE_INFO* FileInfo = NULL;
 
-    Status = BlFsGetFileInfo(KernelFileHandle, &FileInfo);
+    Status = BlFsGetFileInfo( KernelFileHandle, &FileInfo );
     if (EFI_ERROR(Status) || FileInfo == NULL)
     {
         Print(L"[%r] Failed to get kernel file information\n", Status);
@@ -65,7 +65,7 @@ efi_main(
     TimeToString( KernelLastModificationTime, &FileInfo->ModificationTime );
 
     Print( 
-        L"Kernel file information:\n  Size: %llx\n  FileSize: %llx\n  PhysicalSize: %llx\n  CreateTime: %s\n  LastAccessTime: %s\n  ModificationTime: %s\n  Attribute: %d\n FileName: %s\n", 
+        L"Kernel file information:\n  Size: %llx\n  FileSize: %llx\n  PhysicalSize: %llx\n  CreateTime: %s\n  LastAccessTime: %s\n  ModificationTime: %s\n  Attribute: %d\n  FileName: %s\n", 
         FileInfo->Size,
         FileInfo->FileSize,
         FileInfo->PhysicalSize,
@@ -76,8 +76,19 @@ efi_main(
         FileInfo->FileName
     );
 
+    VOID*  KernelFileBuffer = NULL;
+    UINT64 KernelFileBufferSize; 
+    Status = BlFsReadFullFile( KernelFileHandle, &KernelFileBuffer, &KernelFileBufferSize );
+    if( EFI_ERROR( Status ) ) 
+    {
+        Print( L"[%r] Failed to read kernel file\n", Status );
+        goto spinlock;
+    }
+
+    Print( L"Read kernel.elf [%lx]\n", KernelFileBufferSize );
 
 spinlock: 
+    Print( L"Made it to spinlock\n" );
     while( 1 )
     {
         continue;

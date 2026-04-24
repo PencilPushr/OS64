@@ -80,6 +80,131 @@ BlFsOpenFile(
     );
 }
 
+EFI_STATUS 
+BlFsCloseFile(
+    IN EFI_FILE_HANDLE FileHandle 
+)
+{
+    if( FileHandle == NULL )
+    {
+        return EFI_INVALID_PARAMETER;
+    }
+
+    return uefi_call_wrapper( 
+        FileHandle->Close,
+        1,
+        FileHandle
+    );
+}
+
+EFI_STATUS 
+BlFsReadFile( 
+    IN     EFI_FILE_HANDLE FileHandle,
+    IN OUT UINTN*          BufferSize,
+    OUT    VOID*           Buffer
+)
+{
+    if (FileHandle == NULL || BufferSize == NULL || Buffer == NULL)
+    {
+        return EFI_INVALID_PARAMETER;
+    }
+
+    return uefi_call_wrapper(
+        FileHandle->Read,
+        3,
+        FileHandle,
+        BufferSize,
+        Buffer
+    );
+}
+
+EFI_STATUS 
+BlFsReadFullFile( 
+    IN  EFI_FILE_HANDLE FileHandle,
+    OUT VOID**          FileBuffer,
+    OUT UINT64*         FileSize
+)
+{
+    if (FileHandle == NULL || FileBuffer == NULL || FileSize == NULL)
+    {
+        return EFI_INVALID_PARAMETER;
+    }
+
+    *FileBuffer = NULL;
+    *FileSize = 0;
+
+    EFI_STATUS Status;
+    EFI_FILE_INFO* FileInfo = NULL;
+
+    Status = BlFsGetFileInfo(FileHandle, &FileInfo);
+    if (EFI_ERROR(Status))
+    {
+        return Status;
+    }
+
+    if (FileInfo->FileSize == 0)
+    {
+        FreePool(FileInfo);
+        return EFI_LOAD_ERROR;
+    }
+
+    if ( FileInfo->FileSize > UINT64_MAX )
+    {
+        FreePool(FileInfo);
+        return EFI_BAD_BUFFER_SIZE;
+    }
+
+    VOID* Buffer = AllocatePool( FileInfo->FileSize );
+    if (Buffer == NULL)
+    {
+        FreePool(FileInfo);
+        return EFI_OUT_OF_RESOURCES;
+    }
+
+    // Make sure we read from the start of the file.
+
+    Status = uefi_call_wrapper(
+        FileHandle->SetPosition,
+        2,
+        FileHandle,
+        0
+    );
+    if ( EFI_ERROR( Status ) )
+    {
+        FreePool( Buffer );
+        FreePool( FileInfo );
+        return Status;
+    }
+
+    UINT64 BytesToRead = FileInfo->FileSize;
+    Status = uefi_call_wrapper(
+        FileHandle->Read,
+        3,
+        FileHandle,
+        &BytesToRead,
+        Buffer
+    );
+    if ( EFI_ERROR( Status ) )
+    {
+        FreePool( Buffer );
+        FreePool( FileInfo );
+        return Status;
+    }
+
+    if ( BytesToRead != FileInfo->FileSize )
+    {
+        FreePool(Buffer);
+        FreePool(FileInfo);
+        return EFI_LOAD_ERROR;
+    }
+
+    *FileBuffer = Buffer;
+    *FileSize   = FileInfo->FileSize;
+
+    FreePool( FileInfo );
+    return EFI_SUCCESS;
+}
+
 EFI_STATUS
 BlFsGetFileInfo(
     IN     EFI_FILE_HANDLE File, 
@@ -99,6 +224,10 @@ BlFsGetFileInfo(
     EFI_FILE_INFO* FsInfo = NULL;
 
     FsInfo = AllocatePool( Size );
+    if( FsInfo == NULL )
+    {
+        return EFI_OUT_OF_RESOURCES;
+    }
 
     Status = uefi_call_wrapper( 
         File->GetInfo, 
@@ -113,8 +242,11 @@ BlFsGetFileInfo(
     {
         FreePool( FsInfo );
 
-        FsInfo = NULL;
         FsInfo = AllocatePool( Size );
+        if( FsInfo == NULL )
+        {
+            return EFI_OUT_OF_RESOURCES;
+        }
 
         Status = uefi_call_wrapper(
             File->GetInfo,
@@ -128,10 +260,7 @@ BlFsGetFileInfo(
 
     if (EFI_ERROR(Status))
     {
-        if (FsInfo != NULL)
-        {
-           FreePool( FsInfo );
-        }
+        FreePool( FsInfo );
         return Status;
     }
 
@@ -160,6 +289,10 @@ BlFsGetFileSystemInfo(
     EFI_FILE_SYSTEM_INFO* FsInfo = NULL;
 
     FsInfo = AllocatePool( Size );
+    if( FsInfo == NULL )
+    {
+        return EFI_OUT_OF_RESOURCES;
+    }
 
     Status = uefi_call_wrapper(
         File->GetInfo,
@@ -174,8 +307,11 @@ BlFsGetFileSystemInfo(
     {
         FreePool( FsInfo );
 
-        FsInfo = NULL;
         FsInfo = AllocatePool( Size );
+        if( FsInfo == NULL )
+        {
+            return EFI_OUT_OF_RESOURCES;
+        }
 
         Status = uefi_call_wrapper(
             File->GetInfo,
@@ -189,10 +325,7 @@ BlFsGetFileSystemInfo(
 
     if (EFI_ERROR(Status))
     {
-        if (FsInfo != NULL)
-        {
-           FreePool( FsInfo );
-        }
+        FreePool( FsInfo );
         return Status;
     }
 

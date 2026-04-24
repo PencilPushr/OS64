@@ -46,6 +46,39 @@ BlFsOpenFile(
     OUT EFI_FILE_HANDLE* FileHandle
 );
 
+
+/**
+ * Closes specified file handle. Will wait for I/O request to complete before closing.
+ * 
+ * @param FileHandle The handle to close. 
+ * 
+ * @return EFI_SUCCESS If the file was closed.  
+ */
+EFI_STATUS 
+BlFsCloseFile(
+    IN EFI_FILE_HANDLE FileHandle 
+);
+
+/**
+ * 
+ */
+EFI_STATUS
+BlFsReadFile( 
+    IN     EFI_FILE_HANDLE FileHandle,
+    IN OUT UINT64*         BufferSize,
+    OUT    VOID*           Buffer
+);
+
+/**
+ * 
+ */
+EFI_STATUS 
+BlFsReadFullFile( 
+    IN  EFI_FILE_HANDLE FileHandle,
+    OUT VOID**          FileBuffer,
+    OUT UINT64*         FileSize
+);
+
 /**
  * 
  */
