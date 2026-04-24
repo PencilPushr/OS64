@@ -29,37 +29,37 @@ LOADLIBES := $(CRTOBJS) $(LIBEFI_A) $(LIBGNUEFI_A) $(LIBGCC)
 all: dirs bin/bootx64.efi
 
 dirs:
-    mkdir -p build bin
+	mkdir -p build bin
 
 build/%.o: $(SRCDIR)/%.c | dirs
-    $(CC) $(INCDIR) $(CFLAGS) $(CPPFLAGS) -c $< -o $@
+	$(CC) $(INCDIR) $(CFLAGS) $(CPPFLAGS) -c $< -o $@
 
 build/bootloader.so: $(OBJS) | dirs
-    $(LD) $(LDFLAGS) $(OBJS) -o $@ $(LOADLIBES)
+	$(LD) $(LDFLAGS) $(OBJS) -o $@ $(LOADLIBES)
 
 build/bootloader.efi: build/bootloader.so | dirs
-    $(OBJCOPY) \
-        -j .text \
-        -j .text.* \
-        -j .sdata \
-        -j .sdata.* \
-        -j .data \
-        -j .data.* \
-        -j .rodata \
-        -j .rodata.* \
-        -j .dynamic \
-        -j .dynsym \
-        -j .dynstr \
-        -j .rel \
-        -j .rel.* \
-        -j .rela \
-        -j .rela.* \
-        -j .reloc \
-        --target=efi-app-$(ARCH) \
-        $< $@
+	$(OBJCOPY) \
+	    -j .text \
+	    -j .text.* \
+	    -j .sdata \
+	    -j .sdata.* \
+	    -j .data \
+	    -j .data.* \
+	    -j .rodata \
+	    -j .rodata.* \
+	    -j .dynamic \
+	    -j .dynsym \
+	    -j .dynstr \
+	    -j .rel \
+	    -j .rel.* \
+	    -j .rela \
+	    -j .rela.* \
+	    -j .reloc \
+	    --target=efi-app-$(ARCH) \
+	    $< $@
 
 bin/bootx64.efi: build/bootloader.efi | dirs
-    cp $< $@
+	cp $< $@
 
 clean:
-    rm -rf build bin
+	rm -rf build bin
