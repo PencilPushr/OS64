@@ -31,24 +31,51 @@ efi_main(
         goto spinlock;
     }
 
-    EFI_FILE_SYSTEM_INFO* FileSysInfo = { 0 };
-    Status = BlFsGetFileSystemInfo( BootloaderContext.BootVolume.RootDirectory, &FileSysInfo );
-    if( EFI_ERROR( Status ) && FileSysInfo == NULL )
+    EFI_FILE_HANDLE KernelFileHandle = NULL;
+
+    Status = BlFsOpenFile( 
+        BootloaderContext.BootVolume.RootDirectory, 
+        L"\\efi\\os64\\kernel.elf",
+        EFI_FILE_MODE_READ,
+        0,
+        &KernelFileHandle
+    );
+
+    if( EFI_ERROR( Status ) )
     {
-        Print( L"[%r] Failed to get volume information\n", Status );
-        FreePool( FileSysInfo);
+        Print( L"[%r] Failed to open file\n", Status );
         goto spinlock;
     }
 
+    EFI_FILE_INFO* FileInfo = NULL;
+
+    Status = BlFsGetFileInfo(KernelFileHandle, &FileInfo);
+    if (EFI_ERROR(Status) || FileInfo == NULL)
+    {
+        Print(L"[%r] Failed to get kernel file information\n", Status);
+        goto spinlock;
+    }
+
+    CHAR16 KernelCreateTime[64] = { 0 };
+    CHAR16 KernelLastAccessTime[64] = { 0 };
+    CHAR16 KernelLastModificationTime[64] = { 0 };
+
+    TimeToString( KernelCreateTime, &FileInfo->CreateTime );
+    TimeToString( KernelLastAccessTime, &FileInfo->LastAccessTime );
+    TimeToString( KernelLastModificationTime, &FileInfo->ModificationTime );
+
     Print( 
-        L"Volume Information:\n  Size: %llx\n  ReadOnly: %s\n  VolumeSize: %llx\n  FreeSpace: %llx\n  BlockSize: %lx\n  VolumeLabel: %s\n", 
-        FileSysInfo->Size,
-        FileSysInfo->ReadOnly ? L"TRUE" : L"FALSE",
-        FileSysInfo->VolumeSize,
-        FileSysInfo->FreeSpace, 
-        FileSysInfo->BlockSize, 
-        FileSysInfo->VolumeLabel 
+        L"Kernel file information:\n  Size: %llx\n  FileSize: %llx\n  PhysicalSize: %llx\n  CreateTime: %s\n  LastAccessTime: %s\n  ModificationTime: %s\n  Attribute: %d\n FileName: %s\n", 
+        FileInfo->Size,
+        FileInfo->FileSize,
+        FileInfo->PhysicalSize,
+        KernelCreateTime, 
+        KernelLastAccessTime,
+        KernelLastModificationTime,
+        FileInfo->Attribute,
+        FileInfo->FileName
     );
+
 
 spinlock: 
     while( 1 )

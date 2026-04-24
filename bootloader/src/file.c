@@ -173,7 +173,7 @@ BlFsGetFileSystemInfo(
     if (Status == EFI_BUFFER_TOO_SMALL)
     {
         FreePool( FsInfo );
-        
+
         FsInfo = NULL;
         FsInfo = AllocatePool( Size );
 
