@@ -85,7 +85,7 @@ BlFsReadFullFile(
 EFI_STATUS
 BlFsGetFileInfo(
     IN  EFI_FILE_HANDLE File, 
-    OUT EFI_FILE_INFO**  FileInfo
+    OUT EFI_FILE_INFO** FileInfo
 );
 
 /**
