@@ -1,5 +1,5 @@
 #include "bootloader/file.h"
-#include "bootloader/file.h"
+#include "bootloader/graphics.h"
 
 EFI_STATUS
 efi_main(
@@ -7,8 +7,12 @@ efi_main(
     IN EFI_SYSTEM_TABLE *SystemTable
 )
 {
-    InitializeLib( ImageHandle, SystemTable );
+    UNREFERENCED_PARAMETER(SystemTable);
 
+    // Don't actually have to call this as this gets called in _entry 
+    // InitializeLib( ImageHandle, SystemTable );
+
+    uefi_call_wrapper( ST->ConOut->ClearScreen, 1, ST->ConOut );
     Print(L"Hello from OS64 bootloader\r\n");
 
     // When working in less-forgiving enviroments always zero-intialise, 
@@ -16,6 +20,14 @@ efi_main(
 
     EFI_STATUS         Status = EFI_SUCCESS;
     BOOTLOADER_CONTEXT BootloaderContext = { .ImageHandle = ImageHandle };
+    BOOT_INFO*         BootInfo = NULL;
+
+    BootInfo = (BOOT_INFO*)AllocateZeroPool( sizeof( *BootInfo ) );
+    if( BootInfo == NULL )
+    {
+        Print( L"[EFI_OUT_OF_RESOURCES] Failed to allocate for boot info\n" );
+        goto spinlock;
+    }
 
     Status = BlEfiInitialiseLoadedImage( &BootloaderContext );
     if( EFI_ERROR( Status ) )
@@ -31,6 +43,15 @@ efi_main(
         goto spinlock;
     }
 
+    Status = BlGfxInitialiseFrameBuffer( &BootInfo->FrameBufferDescriptor );
+    if( EFI_ERROR( Status ) )
+    {
+        Print( L"[%r] Failed to initialise framebuffer\n", Status );
+        goto spinlock;
+    }
+
+    // Getting the kernel file
+
     EFI_FILE_HANDLE KernelFileHandle = NULL;
 
     Status = BlFsOpenFile( 
@@ -40,41 +61,11 @@ efi_main(
         0,
         &KernelFileHandle
     );
-
     if( EFI_ERROR( Status ) )
     {
         Print( L"[%r] Failed to open file\n", Status );
         goto spinlock;
     }
-
-    EFI_FILE_INFO* FileInfo = NULL;
-
-    Status = BlFsGetFileInfo( KernelFileHandle, &FileInfo );
-    if (EFI_ERROR(Status) || FileInfo == NULL)
-    {
-        Print(L"[%r] Failed to get kernel file information\n", Status);
-        goto spinlock;
-    }
-
-    CHAR16 KernelCreateTime[64] = { 0 };
-    CHAR16 KernelLastAccessTime[64] = { 0 };
-    CHAR16 KernelLastModificationTime[64] = { 0 };
-
-    TimeToString( KernelCreateTime, &FileInfo->CreateTime );
-    TimeToString( KernelLastAccessTime, &FileInfo->LastAccessTime );
-    TimeToString( KernelLastModificationTime, &FileInfo->ModificationTime );
-
-    Print( 
-        L"Kernel file information:\n  Size: %llx\n  FileSize: %llx\n  PhysicalSize: %llx\n  CreateTime: %s\n  LastAccessTime: %s\n  ModificationTime: %s\n  Attribute: %d\n  FileName: %s\n", 
-        FileInfo->Size,
-        FileInfo->FileSize,
-        FileInfo->PhysicalSize,
-        KernelCreateTime, 
-        KernelLastAccessTime,
-        KernelLastModificationTime,
-        FileInfo->Attribute,
-        FileInfo->FileName
-    );
 
     VOID*  KernelFileBuffer = NULL;
     UINT64 KernelFileBufferSize; 
