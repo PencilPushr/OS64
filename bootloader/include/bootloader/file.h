@@ -1,7 +1,7 @@
 #ifndef BOOTLOADER_FILE_H
 #define BOOTLOADER_FILE_H
 
-#include "bootloader/common.h"
+#include <bootloader/common.h>
 
 EFI_STATUS  
 BlFsInitialiseFileSystem (
@@ -17,16 +17,29 @@ BlFsOpenFile(
     OUT EFI_FILE_HANDLE* FileHandle
 );
 
-// TODO: Implement
 
-EFI_STATUS 
-BlFsFindAndOpenFile( 
-    VOID
+EFI_STATUS
+BlFsGetFileInfo(
+    IN     EFI_FILE_HANDLE File, 
+    OUT    EFI_FILE_INFO*  FileInfo
 );
 
 EFI_STATUS
-BlFsFindFilePath(
-    VOID
+BlFsGetFileSystemInfo(
+    IN  EFI_FILE_HANDLE         File,
+    OUT EFI_FILE_SYSTEM_INFO**  FileSysInfo
 );
+
+// TODO: Implement
+
+//EFI_STATUS 
+//BlFsFindAndOpenFile( 
+//    VOID
+//);
+//
+//EFI_STATUS
+//BlFsFindFilePath(
+//    VOID
+//);
 
 #endif // !BOOTLOADER_FILE_H

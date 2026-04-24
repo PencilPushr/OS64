@@ -26,7 +26,7 @@ LOADLIBES := $(CRTOBJS) $(LIBEFI_A) $(LIBGNUEFI_A) $(LIBGCC)
 
 .PHONY: all clean dirs
 
-all: dirs bin/bootx64.efi
+all: dirs bin/BOOTX64.EFI
 
 dirs:
     mkdir -p build bin

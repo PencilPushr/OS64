@@ -1,7 +1,7 @@
 #ifndef BOOTLOADER_COMMON_H
 #define BOOTLOADER_COMMON_H
 
-#include "bootloader/boot.h"
+#include <bootloader/boot.h>
 
 /**
  *  Holds the booted from volume handles/protocols.

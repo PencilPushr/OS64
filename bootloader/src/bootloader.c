@@ -1,5 +1,5 @@
 #include "bootloader/file.h"
-#include "bootloader/common.h"
+#include "bootloader/file.h"
 
 EFI_STATUS
 efi_main(
@@ -21,16 +21,36 @@ efi_main(
     if( EFI_ERROR( Status ) )
     {
         Print( L"[%r] Failed to get loaded image.\n", Status );
-        return Status;
+        goto spinlock;
     }
 
     Status = BlFsInitialiseFileSystem( &BootloaderContext );
     if( EFI_ERROR( Status ) )
     {
         Print( L"[%r] Failed to get root volume handle\n", Status );
-        return Status;
+        goto spinlock;
     }
 
+    EFI_FILE_SYSTEM_INFO* FileSysInfo = { 0 };
+    Status = BlFsGetFileSystemInfo( BootloaderContext.BootVolume.RootDirectory, &FileSysInfo );
+    if( EFI_ERROR( Status ) && FileSysInfo == NULL )
+    {
+        Print( L"[%r] Failed to get volume information\n", Status );
+        FreePool( FileSysInfo);
+        goto spinlock;
+    }
+
+    Print( 
+        L"Volume Information:\n  Size: %llx\n  ReadOnly: %s\n  VolumeSize: %llx\n  FreeSpace: %llx\n  BlockSize: %lx\n  VolumeLabel: %s\n", 
+        FileSysInfo->Size,
+        FileSysInfo->ReadOnly ? L"TRUE" : L"FALSE",
+        FileSysInfo->VolumeSize,
+        FileSysInfo->FreeSpace, 
+        FileSysInfo->BlockSize, 
+        FileSysInfo->VolumeLabel 
+    );
+
+spinlock: 
     while( 1 )
     {
         continue;
