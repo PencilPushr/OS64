@@ -23,7 +23,7 @@ QEMU_FLAGS := \
     -drive if=pflash,format=raw,file=$(OVMF_DIR)/OVMF_VARS_4M.fd \
     -drive format=raw,file=fat:rw:$(OUT) \
     -drive file=$(OVMF_DIR)/UefiShell.iso,format=raw \
-    -m 2048M \
+    -m 4096M \
     -net none \
     -d int \
     -D $(OVMF_DIR)/dbg.log 

@@ -33,11 +33,12 @@ typedef struct _BOOTLOADER_CONTEXT
  * @param LoadedImage      An optional pointer to retrieved image descriptor.
  * 
  * @return EFI_SUCCESS     On successfully retrieving the loaded image. 
+ * 
  *         EFI_UNSUPPROTED Returned by handle protocol if protocol is not supported.
  */
 EFI_STATUS
 BlEfiInitialiseLoadedImage(
-    IN OUT BOOTLOADER_CONTEXT* Context
+    IN OUT BOOTLOADER_CONTEXT* pContext
 );
 
 #endif // !BOOTLOADER_COMMON_H

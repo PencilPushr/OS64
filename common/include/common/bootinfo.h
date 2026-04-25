@@ -18,6 +18,7 @@ typedef struct GOP_FRAMEBUFFER_DESCRIPTOR
 typedef struct _MEMORY_MAP_DESCRIPTOR
 {
     uint32_t Type;
+    uint32_t Pad;
     uint64_t PhysicalStart;
     uint64_t VirtualStart;
     uint64_t NumberOfPages;

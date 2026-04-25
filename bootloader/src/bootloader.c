@@ -1,5 +1,6 @@
 #include "bootloader/file.h"
 #include "bootloader/graphics.h"
+#include "bootloader/mem.h"
 
 EFI_STATUS
 efi_main(
@@ -20,10 +21,10 @@ efi_main(
 
     EFI_STATUS         Status = EFI_SUCCESS;
     BOOTLOADER_CONTEXT BootloaderContext = { .ImageHandle = ImageHandle };
-    BOOT_INFO*         BootInfo = NULL;
+    BOOT_INFO*         pBootInfo = NULL;
 
-    BootInfo = (BOOT_INFO*)AllocateZeroPool( sizeof( *BootInfo ) );
-    if( BootInfo == NULL )
+    pBootInfo = (BOOT_INFO*)AllocateZeroPool( sizeof( *pBootInfo ) );
+    if( pBootInfo == NULL )
     {
         Print( L"[EFI_OUT_OF_RESOURCES] Failed to allocate for boot info\n" );
         goto spinlock;
@@ -43,7 +44,7 @@ efi_main(
         goto spinlock;
     }
 
-    Status = BlGfxInitialiseFrameBuffer( &BootInfo->FrameBufferDescriptor );
+    Status = BlGfxInitialiseFrameBuffer( &pBootInfo->FrameBufferDescriptor );
     if( EFI_ERROR( Status ) )
     {
         Print( L"[%r] Failed to initialise framebuffer\n", Status );
@@ -77,6 +78,21 @@ efi_main(
     }
 
     Print( L"Read kernel.elf [%lx]\n", KernelFileBufferSize );
+
+    Status = BlMmGetMemoryMap( 
+        &pBootInfo->MemoryMap.MapSize,
+        (EFI_MEMORY_DESCRIPTOR**)&pBootInfo->MemoryMap.Descriptor,
+        &pBootInfo->MemoryMap.Key,
+        &pBootInfo->MemoryMap.DescriptorSize,
+        &pBootInfo->MemoryMap.Version
+    );
+    if( EFI_ERROR( Status ) )
+    {
+        Print( L"[%r] Failed to get memory map\n", Status );
+        goto spinlock;
+    }
+
+    Print( L"Memory map key: %lx\n", pBootInfo->MemoryMap.Key );
 
 spinlock: 
     Print( L"Made it to spinlock\n" );

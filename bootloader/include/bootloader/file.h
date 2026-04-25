@@ -43,7 +43,7 @@ BlFsOpenFile(
     IN  CHAR16*          Path,
     IN  UINT64           OpenMode,
     IN  UINT64           OpenAttributes,
-    OUT EFI_FILE_HANDLE* FileHandle
+    OUT EFI_FILE_HANDLE* pFileHandle
 );
 
 
@@ -65,8 +65,8 @@ BlFsCloseFile(
 EFI_STATUS
 BlFsReadFile( 
     IN     EFI_FILE_HANDLE FileHandle,
-    IN OUT UINT64*         BufferSize,
-    OUT    VOID*           Buffer
+    IN OUT UINT64*         pBufferSize,
+    OUT    VOID*           pBuffer
 );
 
 /**
@@ -75,8 +75,8 @@ BlFsReadFile(
 EFI_STATUS 
 BlFsReadFullFile( 
     IN  EFI_FILE_HANDLE FileHandle,
-    OUT VOID**          FileBuffer,
-    OUT UINT64*         FileSize
+    OUT VOID**          pFileBuffer,
+    OUT UINT64*         pFileSize
 );
 
 /**
@@ -85,7 +85,7 @@ BlFsReadFullFile(
 EFI_STATUS
 BlFsGetFileInfo(
     IN  EFI_FILE_HANDLE File, 
-    OUT EFI_FILE_INFO** FileInfo
+    OUT EFI_FILE_INFO** pFileInfo
 );
 
 /**
@@ -94,7 +94,7 @@ BlFsGetFileInfo(
 EFI_STATUS
 BlFsGetFileSystemInfo(
     IN  EFI_FILE_HANDLE         File,
-    OUT EFI_FILE_SYSTEM_INFO**  FileSysInfo
+    OUT EFI_FILE_SYSTEM_INFO**  pFileSysInfo
 );
 
 // TODO: Implement

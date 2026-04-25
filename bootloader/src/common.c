@@ -2,15 +2,15 @@
 
 EFI_STATUS
 BlEfiInitialiseLoadedImage(
-    IN OUT BOOTLOADER_CONTEXT* Context
+    IN OUT BOOTLOADER_CONTEXT* pContext
 )
 {
-    if( Context == NULL )
+    if( pContext == NULL )
     {
         return EFI_INVALID_PARAMETER;
     }
 
-    if ( Context->ImageHandle == NULL )
+    if ( pContext->ImageHandle == NULL )
     {
         return EFI_NOT_READY;
     }
@@ -18,10 +18,10 @@ BlEfiInitialiseLoadedImage(
     return uefi_call_wrapper(
         BS->OpenProtocol,
         6,
-        Context->ImageHandle,
+        pContext->ImageHandle,
         &LoadedImageProtocol,
-        (VOID**)&Context->LoadedImage,
-        Context->ImageHandle,
+        (VOID**)&pContext->LoadedImage,
+        pContext->ImageHandle,
         NULL,
         EFI_OPEN_PROTOCOL_BY_HANDLE_PROTOCOL
     );

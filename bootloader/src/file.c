@@ -2,15 +2,15 @@
 
 EFI_STATUS 
 BlFsInitialiseFileSystem (
-    IN OUT BOOTLOADER_CONTEXT* Context
+    IN OUT BOOTLOADER_CONTEXT* pContext
 )
 {
-    if( Context == NULL )
+    if( pContext == NULL )
     {
         return EFI_INVALID_PARAMETER;
     }
 
-    if ( Context->LoadedImage == NULL )
+    if ( pContext->LoadedImage == NULL )
     {
         return EFI_NOT_READY;
     }
@@ -18,7 +18,7 @@ BlFsInitialiseFileSystem (
     EFI_STATUS             Status = EFI_SUCCESS;
     EFI_FILE_IO_INTERFACE* Volume = NULL;
 
-    Context->BootVolume.DeviceHandle = Context->LoadedImage->DeviceHandle;
+    pContext->BootVolume.DeviceHandle = pContext->LoadedImage->DeviceHandle;
 
     // Per spec -- https://uefi.org/specs/UEFI/2.10/07_Services_Boot_Services.html?highlight=handleprotocol#efi-boot-services-handleprotocol
     // File the file system interface to the device, through the newer 'OpenProtocol'. 'HandleProtocol' is depreciated.
@@ -27,10 +27,10 @@ BlFsInitialiseFileSystem (
     Status = uefi_call_wrapper( 
         BS->OpenProtocol, 
         6, 
-        Context->BootVolume.DeviceHandle, 
+        pContext->BootVolume.DeviceHandle, 
         &FileSystemProtocol, 
         (VOID**)&Volume, 
-        Context->ImageHandle, 
+        pContext->ImageHandle, 
         NULL, 
         EFI_OPEN_PROTOCOL_BY_HANDLE_PROTOCOL 
     );
@@ -45,9 +45,9 @@ BlFsInitialiseFileSystem (
         Volume->OpenVolume, 
         2, 
         Volume, 
-        (VOID*)&Context->BootVolume.RootDirectory 
+        (VOID*)&pContext->BootVolume.RootDirectory 
     );
-    if( EFI_ERROR( Status ) || Context->BootVolume.RootDirectory  == NULL )
+    if( EFI_ERROR( Status ) || pContext->BootVolume.RootDirectory  == NULL )
     {
         return Status;
     }
@@ -61,10 +61,10 @@ BlFsOpenFile(
     IN  CHAR16*          Path,
     IN  UINT64           OpenMode,
     IN  UINT64           OpenAttributes,
-    OUT EFI_FILE_HANDLE* FileHandle
+    OUT EFI_FILE_HANDLE* pFileHandle
 )
 {
-    if ( Directory == NULL || Path == NULL || FileHandle == NULL ) 
+    if ( Directory == NULL || Path == NULL || pFileHandle == NULL ) 
     {
         return EFI_INVALID_PARAMETER;
     }
@@ -73,7 +73,7 @@ BlFsOpenFile(
         Directory->Open,
         5,
         Directory,
-        FileHandle,
+        pFileHandle,
         Path,
         OpenMode,
         OpenAttributes
@@ -100,11 +100,11 @@ BlFsCloseFile(
 EFI_STATUS 
 BlFsReadFile( 
     IN     EFI_FILE_HANDLE FileHandle,
-    IN OUT UINTN*          BufferSize,
-    OUT    VOID*           Buffer
+    IN OUT UINTN*          pBufferSize,
+    OUT    VOID*           pBuffer
 )
 {
-    if (FileHandle == NULL || BufferSize == NULL || Buffer == NULL)
+    if (FileHandle == NULL || pBufferSize == NULL || pBuffer == NULL)
     {
         return EFI_INVALID_PARAMETER;
     }
@@ -113,25 +113,25 @@ BlFsReadFile(
         FileHandle->Read,
         3,
         FileHandle,
-        BufferSize,
-        Buffer
+        pBufferSize,
+        pBuffer
     );
 }
 
 EFI_STATUS 
 BlFsReadFullFile( 
     IN  EFI_FILE_HANDLE FileHandle,
-    OUT VOID**          FileBuffer,
-    OUT UINT64*         FileSize
+    OUT VOID**          pFileBuffer,
+    OUT UINT64*         pFileSize
 )
 {
-    if (FileHandle == NULL || FileBuffer == NULL || FileSize == NULL)
+    if (FileHandle == NULL || pFileBuffer == NULL || pFileSize == NULL)
     {
         return EFI_INVALID_PARAMETER;
     }
 
-    *FileBuffer = NULL;
-    *FileSize = 0;
+    *pFileBuffer = NULL;
+    *pFileSize = 0;
 
     EFI_STATUS Status;
     EFI_FILE_INFO* FileInfo = NULL;
@@ -198,8 +198,8 @@ BlFsReadFullFile(
         return EFI_LOAD_ERROR;
     }
 
-    *FileBuffer = Buffer;
-    *FileSize   = FileInfo->FileSize;
+    *pFileBuffer = Buffer;
+    *pFileSize   = FileInfo->FileSize;
 
     FreePool( FileInfo );
     return EFI_SUCCESS;
@@ -208,10 +208,10 @@ BlFsReadFullFile(
 EFI_STATUS
 BlFsGetFileInfo(
     IN     EFI_FILE_HANDLE File, 
-    OUT    EFI_FILE_INFO** FileInfo
+    OUT    EFI_FILE_INFO** pFileInfo
 )
 {
-    if( File == NULL ||  FileInfo == NULL )
+    if( File == NULL ||  pFileInfo == NULL )
     {
         return EFI_INVALID_PARAMETER;
     }
@@ -264,22 +264,22 @@ BlFsGetFileInfo(
         return Status;
     }
 
-    *FileInfo = FsInfo;
+    *pFileInfo = FsInfo;
     return EFI_SUCCESS;
 }
 
 EFI_STATUS
 BlFsGetFileSystemInfo(
     IN  EFI_FILE_HANDLE         File,
-    OUT EFI_FILE_SYSTEM_INFO**  FileSysInfo
+    OUT EFI_FILE_SYSTEM_INFO**  pFileSysInfo
 )
 {
-    if (File == NULL || FileSysInfo == NULL)
+    if (File == NULL || pFileSysInfo == NULL)
     {
         return EFI_INVALID_PARAMETER;
     }
 
-    *FileSysInfo = NULL;
+    *pFileSysInfo = NULL;
 
     // Per documentation EFI_FIELD_OFFSET should be used to get the correct size
     // for file info structures. The define uses EFI_FIELD_OFFSET internally.
@@ -329,7 +329,8 @@ BlFsGetFileSystemInfo(
         return Status;
     }
 
-    *FileSysInfo = FsInfo;
+    *pFileSysInfo = FsInfo;
+
     return EFI_SUCCESS;
 }
 
