@@ -1,6 +1,7 @@
 #include "bootloader/file.h"
 #include "bootloader/graphics.h"
 #include "bootloader/mem.h"
+#include "bootloader/fonts.h"
 
 EFI_STATUS
 efi_main(
