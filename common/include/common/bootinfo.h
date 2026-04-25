@@ -1,3 +1,6 @@
+#ifndef COMMON_BOOTINFO_H
+#define COMMON_BOOTINFO_H
+
 #include <stdint.h>
 
 typedef struct GOP_FRAMEBUFFER_DESCRIPTOR
@@ -42,3 +45,5 @@ typedef struct _BOOT_INFO
     MEMORY_MAP                 MemoryMap; 
     
 } BOOT_INFO;
+
+#endif // !COMMON_BOOTINFO_H
