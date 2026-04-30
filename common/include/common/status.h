@@ -36,6 +36,4 @@ typedef uint32_t GLOBAL_STATUS
 #define SUCCEEDED( Status ) ( !FAILED( Status ) )
 
 
-
-
 #endif // !COMMON_STATUS_H
