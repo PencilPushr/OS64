@@ -2,6 +2,7 @@
 #include "bootloader/graphics.h"
 #include "bootloader/mem.h"
 #include "bootloader/fonts.h"
+#include "bootloader/elfldr.h"
 
 EFI_STATUS
 efi_main(
@@ -94,6 +95,8 @@ efi_main(
     }
 
     Print( L"Memory map key: %lx\n", pBootInfo->MemoryMap.Key );
+
+    BlElfLoadImage( KernelFileBuffer, KernelFileBufferSize );
 
 spinlock: 
     Print( L"Made it to spinlock\n" );

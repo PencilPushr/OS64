@@ -61,7 +61,6 @@
 #define EM_LOONGARCH    258 /* LoongArch */
 #define EM_FRV          0x5441 /* Fujitsu FR-V */
 
-
 /*
  * This is an interim value that we will use until the committee comes
  * up with a final number.
@@ -252,7 +251,6 @@ typedef struct _Elf64_Dyn
 #define ELF64_R_SYM(i)         ((i) >> 32)
 #define ELF64_R_TYPE(i)        ((i) & 0xffffffff)
 #define ELF64_R_INFO(s, t)     ((((uint64_t)(s)) << 32) + ((t) & 0xffffffff))
-
 
 typedef struct _Elf32_Rel 
 {
