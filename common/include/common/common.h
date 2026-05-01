@@ -22,4 +22,28 @@
 #define LOW_QWORD128(a)   ((uint64_t)((__uint128_t)(a) & 0xFFFFFFFFFFFFFFFFull))
 #define HIGH_QWORD128(a)  ((uint64_t)(((__uint128_t)(a) >> 64) & 0xFFFFFFFFFFFFFFFFull))
 
+#ifndef _In_
+#define _In_
+#endif
+#ifndef _In_opt_
+#define _In_opt_
+#endif
+#ifndef _Inout_
+#define _Inout_
+#endif
+#ifndef _Inout_opt_
+#define _Inout_opt_
+#endif
+#ifndef _Out_
+#define _Out_
+#endif
+#ifndef _Out_opt_
+#define _Out_opt_
+#endif
+
+#ifndef static_assert
+#define static_assert _Static_assert
+#endif
+
+
 #endif // !COMMON_COMMON_H

@@ -3,6 +3,7 @@
 
 #include "bootloader/boot.h"
 #include "common/elfdef.h"
+#include "common/paging.h"
 
 EFI_STATUS
 BlElfLoadImage( 
