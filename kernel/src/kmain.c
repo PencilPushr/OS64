@@ -4,5 +4,5 @@ kmain(
     void
 )
 {
-    return 0;
+    return 0xC1A;
 }
