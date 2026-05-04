@@ -1,5 +1,0 @@
-#ifndef BOOTLOADER_FONTS_H
-#define BOOTLOADER_FONTS_H
-
-
-#endif // BOOTLOADER_FONTS_H
