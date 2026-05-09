@@ -1,5 +1,5 @@
 /*
- * font.c — PSF2-compatible bitmap font system
+ * font.c - PSF2-compatible bitmap font system
  *
  * Contains:
  *   - Complete VGA 8x16 font (CP437, all 256 glyphs)
@@ -11,7 +11,7 @@
  * stored as 16 bytes per glyph (1 byte per row, MSB = leftmost pixel).
  *
  * CP437 layout:
- *   0x00-0x1F  Box/symbol characters (smiley, card suits, arrows …)
+ *   0x00-0x1F  Box/symbol characters (smiley, card suits, arrows ...)
  *   0x20-0x7E  Standard ASCII printable characters
  *   0x7F       House / delete symbol
  *   0x80-0xFF  Extended (accented letters, box drawing, Greek, math)
@@ -25,11 +25,11 @@
 
 _Static_assert(sizeof(PSF2_Header) == 32, "PSF2 header must be 32 bytes");
 
-/* ═══════════════════════════════════════════════════════════════════
- * VGA 8x16 Font Data — All 256 CP437 Glyphs
+/* 
+ * VGA 8x16 Font Data - All 256 CP437 Glyphs
  * Source: Standard VGA ROM BIOS font, public domain.
  * Format: 16 bytes per glyph, MSB = leftmost pixel, 1 = foreground.
- * ═══════════════════════════════════════════════════════════════════ */
+ */
 
 const uint8_t vga_font_8x16[256 * 16] = {
     // ---- 0x00: Null (blank) ----
@@ -825,10 +825,6 @@ const uint8_t vga_font_8x16[256 * 16] = {
     0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
 };
 
-/* ═══════════════════════════════════════════════════════════════════
- * Font Initialisation
- * ═══════════════════════════════════════════════════════════════════ */
-
 GLOBAL_STATUS
 FontInitDefault(Font *OutFont)
 {
@@ -846,6 +842,10 @@ FontInitDefault(Font *OutFont)
     return OK;
 }
 
+/**
+* @brief
+* 
+*/
 GLOBAL_STATUS
 FontInitPSF2(
     Font         *OutFont,
@@ -861,7 +861,7 @@ FontInitPSF2(
 
     const PSF2_Header *Hdr = (const PSF2_Header *)pData;
 
-    /* Validate magic — compare raw bytes so endianness is irrelevant. */
+
     static const uint8_t Psf2Magic[4] = PSF2_MAGIC_BYTES;
     if (memcmp(Hdr->MagicBytes, Psf2Magic, sizeof(Psf2Magic)) != 0)
         return STATUS_INVALID_PSF2_MAGIC;
@@ -891,7 +891,6 @@ FontInitPSF2(
     if (Size < Needed)
         return STATUS_BAD_PSF2_GLYPH_DATA;
 
-    /* Everything checks out — populate the format-agnostic Font. */
     OutFont->GlyphData     = (const uint8_t *)pData + Hdr->HeaderSz;
     OutFont->Width         = Hdr->Width;
     OutFont->Height        = Hdr->Height;
@@ -907,17 +906,15 @@ FontInitPSF2(
     return OK;
 }
 
-/* ═══════════════════════════════════════════════════════════════════
- * Glyph Lookup
- * ═══════════════════════════════════════════════════════════════════ */
-
+/**
+* @brief Returns the glyph associated 
+* 
+* Out-of-range codepoints fall back to '?' if available,
+* otherwise glyph 0 (typically blank / missing-glyph symbol).
+*/
 const uint8_t *
 FontGetGlyph(const Font *pFont, uint32_t Codepoint)
 {
-    /*
-     * Out-of-range codepoints fall back to '?' if available,
-     * otherwise glyph 0 (typically blank / missing-glyph symbol).
-     */
     if (Codepoint >= pFont->NumGlyphs)
     {
         if ('?' < pFont->NumGlyphs)

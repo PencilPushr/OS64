@@ -1,4 +1,5 @@
 #include "bootloader/graphics.h"
+#include "common/status_codes.h"
 
 EFI_STATUS
 BlGfxInitialiseFrameBuffer(
@@ -13,9 +14,8 @@ BlGfxInitialiseFrameBuffer(
     EFI_GRAPHICS_OUTPUT_PROTOCOL *Gop;
     EFI_STATUS Status;
 
-    //Status = uefi_call_wrapper( ST->BootServices->LocateProtocol, 3
-    //                            &GopGuid, NULL, (VOID **)&Gop );
-    Status = ST->BootServices->LocateProtocol(&GraphicsOutputProtocol, NULL, (VOID**)&Gop);
+    Status = uefi_call_wrapper( ST->BootServices->LocateProtocol, 3,
+                                &GraphicsOutputProtocol, NULL, (VOID **)&Gop);
     if ( EFI_ERROR( Status ) )
     {
         Print(L"ERROR: Failed to locate GOP\n");
@@ -76,3 +76,49 @@ BlGfxInitialiseFrameBuffer(
 
     return EFI_SUCCESS;
 }
+
+static GLOBAL_STATUS
+DrawRect(
+    IN GOP_FRAMEBUFFER_DESCRIPTOR* pFrameBufferDesc,
+    IN uint32_t x,
+    IN uint32_t y,
+    IN uint32_t w,
+    IN uint32_t h,
+    IN uint32_t Colour
+)
+{
+    if ( !pFrameBufferDesc )
+        return STATUS_FRAMEBUFFER_WAS_NULL;
+    
+    uint32_t* Pixels = (uint32_t *)pFrameBufferDesc->Base;
+    int PixelsPerScanLine = pFrameBufferDesc->Pitch / 4;
+
+    for( uint32_t Row = y; Row < y + h && Row < pFrameBufferDesc->Height; Row++ )
+    {
+        for( uint32_t Col = x; Col < x + w && Col < pFrameBufferDesc->Width; Col++ )
+        {
+            Pixels[ Row * PixelsPerScanLine + Col ] = Colour;
+        }
+    }
+
+    return OK;
+}
+
+GLOBAL_STATUS
+FillScreen(
+    IN GOP_FRAMEBUFFER_DESCRIPTOR* pFrameBufferDesc,
+    IN uint32_t Colour
+)
+{
+    GLOBAL_STATUS Status = DrawRect(
+        pFrameBufferDesc,
+        0,
+        0,
+        pFrameBufferDesc->Width,
+        pFrameBufferDesc->Height,
+        Colour
+    );
+
+    return Status;
+}
+

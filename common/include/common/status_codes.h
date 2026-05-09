@@ -10,7 +10,7 @@
  *                         ^^^^^^^^^^^   ^^^^^^^^^   ^^^^^^^^
  *                         how bad?      where?      what?
  *
- * Reads like C++ scope resolution — each field narrows the meaning.
+ * Reads like C++ scope resolution - each field narrows the meaning.
  */
  
 /* 
@@ -56,4 +56,8 @@
     MAKE_STATUS(SEVERITY_ERROR, SCOPE_GFX, CODE_OVERFLOW)
  
 
+#define STATUS_FRAMEBUFFER_WAS_NULL                                       \
+    MAKE_STATUS(SEVERITY_ERROR, SCOPE_GFX, CODE_NULL_FRAMEBUFF)
+
+    
 #endif

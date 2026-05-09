@@ -1,7 +1,13 @@
 #include "bootloader/file.h"
 #include "bootloader/graphics.h"
 #include "bootloader/mem.h"
-#include "bootloader/fonts.h"
+#include "common/status_codes.h"
+
+extern GLOBAL_STATUS 
+FillScreen(
+    IN GOP_FRAMEBUFFER_DESCRIPTOR* pFrameBufferDesc,
+    IN int Colour
+);
 
 EFI_STATUS
 efi_main(
@@ -94,6 +100,12 @@ efi_main(
     }
 
     Print( L"Memory map key: %lx\n", pBootInfo->MemoryMap.Key );
+
+    // Clear the screen to avoid garbage pixels - Just setting it to an obvious colour
+    /* TODO: Change this to black when we are confident */
+
+    int Purple = 0x00800080;
+    FillScreen( &pBootInfo->FrameBufferDescriptor, Purple );
 
 spinlock: 
     Print( L"Made it to spinlock\n" );

@@ -3,8 +3,8 @@
 // common/
 
 /*
- * SCOPE  — the subsystem that produced the status.
- * CODE   — the specific condition within that scope.
+ * SCOPE  - the subsystem that produced the status.
+ * CODE   - the specific condition within that scope.
  *
  * Together with a severity they form a GLOBAL_STATUS via MAKE_STATUS().
  *
@@ -46,6 +46,7 @@ typedef enum _CODE
     CODE_BAD_VERSION      = 0x0102,
     CODE_BAD_GLYPH_DATA   = 0x0103,
     CODE_OVERFLOW         = 0x0104,
+    CODE_NULL_FRAMEBUFF   = 0x0110,
  
     /* ---- SCOPE_FS          0x0200 – 0x02FF ---- */
     CODE_FILE_NOT_FOUND   = 0x0200,

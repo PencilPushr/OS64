@@ -8,7 +8,7 @@
 
 #define PSF2_FLAG_UNICODE   0x01       // Font has Unicode mapping table
 
-// Reasonable upper bounds — reject obviously broken headers early.
+// Reasonable upper bounds - reject obviously broken headers early.
 #define PSF2_MAX_WIDTH          32u
 #define PSF2_MAX_HEIGHT         64u
 
@@ -29,7 +29,7 @@ typedef struct __attribute__((packed)) PSF2_Header_t
 /**
  * @brief Format agnostic structure for font rendering:
  * Any font backend (PSF2, VGA built-in, future formats) populates
- * this struct.  Renderers only depend on Font — never on a specific
+ * this struct.  Renderers only depend on Font - never on a specific
  * file-format header.
  * 
  */
@@ -40,7 +40,7 @@ typedef struct Font_t
     uint32_t       Width;           /* glyph width  in pixels           */
     uint32_t       Height;          /* glyph height in pixels           */
     uint32_t       BytesPerGlyph;
-    uint32_t       BytesPerRow;     /* (Width + 7) / 8  — precomputed  */
+    uint32_t       BytesPerRow;     /* (Width + 7) / 8  - precomputed  */
     uint32_t       NumGlyphs;
 
 } Font;

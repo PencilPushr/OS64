@@ -6,9 +6,9 @@
 /*
  * Status code layout (32-bit):
  *
- *   [31..30]  Severity  (2 bits)   — OK / WARN / ERROR / FATAL
- *   [29..16]  Scope     (14 bits)  — subsystem (GFX, FS, MM …)
- *   [15.. 0]  Code      (16 bits)  — specific error within that scope
+ *   [31..30]  Severity  (2 bits)   - OK / WARN / ERROR / FATAL
+ *   [29..16]  Scope     (14 bits)  - subsystem (GFX, FS, MM …)
+ *   [15.. 0]  Code      (16 bits)  - specific error within that scope
  *
  * Usage:  MAKE_STATUS( SEVERITY_xxx, SCOPE_xxx, CODE_xxx )
  *

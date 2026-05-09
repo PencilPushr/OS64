@@ -6,6 +6,8 @@ SECTIONS {
     . = 0x100000;
 
     .text : {
+        /* Realised that kmain is never guarenteed to come first */
+        *(.text.kernel_main)
         *(.text*)
     }
 
