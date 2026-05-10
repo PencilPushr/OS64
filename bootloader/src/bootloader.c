@@ -104,8 +104,10 @@ efi_main(
     // Clear the screen to avoid garbage pixels - Just setting it to an obvious colour
     /* TODO: Change this to black when we are confident */
 
-    int Purple = 0x00800080;
-    FillScreen( &pBootInfo->FrameBufferDescriptor, Purple );
+    //int Purple = 0x00800080;
+    //int Black =  0x00000000;
+    //
+    // FillScreen( &pBootInfo->FrameBufferDescriptor, Black );
 
 spinlock: 
     Print( L"Made it to spinlock\n" );

@@ -4,8 +4,9 @@
 __attribute__((section(".text.kernel_main")))
 int 
 kmain(
-    void
+    BOOT_INFO* pBootInfo
 )
 {
+    
     return 0;
 }
