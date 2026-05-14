@@ -55,7 +55,8 @@ build/bootloader.efi: build/bootloader.so | dirs
 	    -j .rela \
 	    -j .rela.* \
 	    -j .reloc \
-	    --target=efi-app-$(ARCH) \
+	    -O pei-x86-64 \
+		--subsystem=10 \
 	    $< $@
 
 bin/bootx64.efi: build/bootloader.efi | dirs
