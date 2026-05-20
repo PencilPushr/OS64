@@ -26,7 +26,10 @@ QEMU_FLAGS := \
     -m 4096M \
     -net none \
     -d int \
-    -D $(OVMF_DIR)/dbg.log 
+    -D $(OVMF_DIR)/dbg.log  \
+	-monitor none \
+	-debugcon stdio \
+	-global isa-debugcon.iobase=0xe9
 
 # --- targets ---
 

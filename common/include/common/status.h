@@ -8,14 +8,12 @@
 * To give more verbose logging functionality.
 * For now this is effecitively equivalent to errno() and GetLastError()
 */
-uint32_t g_GlobalError = 0;
+//uint32_t g_GlobalError = 0;
 
-typedef uint32_t GLOBAL_STATUS
+typedef uint32_t GLOBAL_STATUS;
 
 #define SEVERITY_SHIFT 30u
-#define FACILITY_SHIFT 16u
-
-#define SEVERITY_MASK(x) (x & ~0x3FFF_FFFF)
+#define SCOPE_SHIFT    16u
 
 #define SEVERITY_OK     0u
 #define SEVERITY_WARN   1u
@@ -31,9 +29,9 @@ typedef uint32_t GLOBAL_STATUS
 #define SCOPE_FROM_STATUS( Status )    ( ( ( (GLOBAL_STATUS)( Status ) ) >> SCOPE_SHIFT ) & 0x3FFF )
 #define CODE_FROM_STATUS( Status )         ( (GLOBAL_STATUS)( Status ) & 0xFFFF )
 
-#define OK                  ( MAKE_STATUS( SEVERITY_OK, 0, 0 ) )
-#define FAILED( Status )    ( SEVERITY_FROM_STATUS( Status ) >= SEVERITY_ERROR )
-#define SUCCEEDED( Status ) ( !FAILED( Status ) )
+#define STATUS_OK                  ( MAKE_STATUS( SEVERITY_OK, 0, 0 ) )
+#define STATUS_FAILED( Status )    ( SEVERITY_FROM_STATUS( Status ) >= SEVERITY_ERROR )
+#define STATUS_SUCCEEDED( Status ) ( !STATUS_FAILED( Status ) )
 
 
 #endif // !COMMON_STATUS_H

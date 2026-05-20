@@ -46,4 +46,11 @@ typedef struct _BOOT_INFO
     
 } BOOT_INFO;
 
+typedef uint32_t(*KMAIN_FN)(BOOT_INFO*);
+
+#define KMAIN_ENTRY(Name, BootInfoName)                               \
+    uint32_t Name(BOOT_INFO* BootInfoName);                           \
+    static KMAIN_FN Name##_type_check __attribute__((unused)) = Name; \
+    uint32_t Name(BOOT_INFO* BootInfoName)
+
 #endif // !COMMON_BOOTINFO_H

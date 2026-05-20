@@ -81,6 +81,14 @@ efi_main(
 
     Print( L"Read kernel.elf [%lx]\n", KernelFileBufferSize );
 
+    UINT64 KernelEntry = 0;
+    Status = BlElfLoadImage( KernelFileBuffer, KernelFileBufferSize, &KernelEntry );
+    if( EFI_ERROR( Status ) )
+    {
+        Print( L"[%r] Failed to load kernel\n", Status );
+        goto spinlock;
+    }
+
     Status = BlMmGetMemoryMap( 
         &pBootInfo->MemoryMap.MapSize,
         (EFI_MEMORY_DESCRIPTOR**)&pBootInfo->MemoryMap.Descriptor,
@@ -94,25 +102,18 @@ efi_main(
         goto spinlock;
     }
 
-    Print( L"Memory map key: %lx\n", pBootInfo->MemoryMap.Key );
-
-    UINT64 KernelEntry = 0;
-    Status = BlElfLoadImage( KernelFileBuffer, KernelFileBufferSize, &KernelEntry );
+    Status = BS->ExitBootServices( ImageHandle, pBootInfo->MemoryMap.Key );
     if( EFI_ERROR( Status ) )
     {
-        Print( L"[%r] Failed to load kernel\n", Status );
+        Print( L"[%r] ExitBootServices failed\n", Status );
         goto spinlock;
     }
 
-    typedef int(*K_ENTRY)(void);
-    K_ENTRY Entry = (K_ENTRY)KernelEntry;
+     ( (KMAIN_FN)KernelEntry )( pBootInfo );
 
-    INT32 ret = Entry();
-
-    Print(L"\nKernel returned [0x%lx]\n\n", ret );
+    //Print( L"returned %lx\n", ( (KMAIN_FN)KernelEntry )( pBootInfo ) );
 
 spinlock: 
-    Print( L"Made it to spinlock\n" );
     while( 1 )
     {
         continue;

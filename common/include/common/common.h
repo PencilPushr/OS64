@@ -45,5 +45,16 @@
 #define static_assert _Static_assert
 #endif
 
+#undef NULL
+
+#ifndef NULL
+#define NULL (void*)0
+#endif // !NULL
+
+
+#define ARRAY_LENGTH(x) ((sizeof(x)/sizeof(0[x])) / ((uint64_t)(!(sizeof(x) % sizeof(0[x])))))
+
+
+
 
 #endif // !COMMON_COMMON_H
