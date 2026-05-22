@@ -843,8 +843,16 @@ FontInitDefault(Font *OutFont)
 }
 
 /**
-* @brief
+* @brief Parses the PSF2 Header to fill out the agnostic Font interface struct
 * 
+* Performs parsing in the following stages:
+*   1. Basic checks - Null ptr check, font size to header size
+*   2. Check magic bytes match
+*   3. Check header version, header size to header size comparison 
+*   4. Dimension checks
+*   5. Glyph overflow ( so we dont have glyphs that start going out of their boxes )
+*
+*   Finally, fill out the Font_t struct, check if unicode.
 */
 GLOBAL_STATUS
 FontInitPSF2(

@@ -77,6 +77,35 @@ BlGfxInitialiseFrameBuffer(
     return EFI_SUCCESS;
 }
 
+static uint8_t
+MaskToShift(
+    IN uint32_t Mask
+)
+{
+    if (Mask == 0) return 0;
+    uint8_t Shift = 0;
+    while ((Mask & 1) == 0) {
+        Mask >>= 1;
+        Shift++;
+    }
+    return Shift;
+}
+
+static uint32_t
+ConvertColour(
+    IN GOP_FRAMEBUFFER_DESCRIPTOR* pFrameBufferDesc,
+    IN uint32_t Xrgb
+)
+{
+    uint8_t r = (Xrgb >> 16) & 0xFF;
+    uint8_t g = (Xrgb >>  8) & 0xFF;
+    uint8_t b = (Xrgb      ) & 0xFF;
+
+    return ((uint32_t)r << MaskToShift(pFrameBufferDesc->RedMask))   |
+           ((uint32_t)g << MaskToShift(pFrameBufferDesc->GreenMask)) |
+           ((uint32_t)b << MaskToShift(pFrameBufferDesc->BlueMask));
+}
+
 static GLOBAL_STATUS
 DrawRect(
     IN GOP_FRAMEBUFFER_DESCRIPTOR* pFrameBufferDesc,
@@ -93,11 +122,17 @@ DrawRect(
     uint32_t* Pixels = (uint32_t *)pFrameBufferDesc->Base;
     int PixelsPerScanLine = pFrameBufferDesc->Pitch / 4;
 
+    // 21/05/2026 - Colour fix: note this is inefficient - MaskToShift walks bits everytime ConvertColour is called
+    //                          Ideally - compute the shifts once during init and store them in a variable. 
+    //                                     One variable for each shift: ( rshift, gshift, bshift )
+    // This is acceptable for now as we just want to init the boot services and then get out. Dump/Print if something has gone wrong
+    uint32_t HwColour = ConvertColour(pFrameBufferDesc, Colour);
+
     for( uint32_t Row = y; Row < y + h && Row < pFrameBufferDesc->Height; Row++ )
     {
         for( uint32_t Col = x; Col < x + w && Col < pFrameBufferDesc->Width; Col++ )
         {
-            Pixels[ Row * PixelsPerScanLine + Col ] = Colour;
+            Pixels[ Row * PixelsPerScanLine + Col ] = HwColour;
         }
     }
 

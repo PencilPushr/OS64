@@ -101,6 +101,11 @@ efi_main(
 
     Print( L"Memory map key: %lx\n", pBootInfo->MemoryMap.Key );
 
+
+    // 21/05/2026 - This is a bug. Hardcoding the colours with the names given 
+    // -> you should be using the masks in graphics.c for the GOP_FRAMEBUFFER_DESCRIPTOR->RedMask ... GreenMask ... BlueMask  
+    
+    
     // Clear the screen to avoid garbage pixels - Just setting it to an obvious colour
     /* TODO: Change this to black when we are confident */
 
