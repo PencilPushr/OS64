@@ -4,7 +4,7 @@
 
 
 GLOBAL_STATUS
-DrawRect(
+KeGfxDrawRect(
     IN GOP_FRAMEBUFFER_DESCRIPTOR* pFrameBufferDesc,
     IN uint32_t x,
     IN uint32_t y,
@@ -14,7 +14,7 @@ DrawRect(
 );
 
 GLOBAL_STATUS
-FillScreen(
+KeGfxFillScreen(
     IN GOP_FRAMEBUFFER_DESCRIPTOR* pFrameBufferDesc,
     IN uint32_t Colour
 );
