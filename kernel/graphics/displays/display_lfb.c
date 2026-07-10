@@ -120,6 +120,23 @@ KeDpLfbPutPixel(
 
 }
 
+static uint32_t
+KeDpLfbGetPixel(
+    DisplayDevice *Device,
+    uint32_t x,
+    uint32_t y
+)
+{
+    LFBData * pDriver = Device->DriverSpecific;
+    
+    if ( x >= pDriver->Width || y >= pDriver->Height )
+        return 0;
+
+    uint32_t HWColour = pDriver->pFrameBuffer[ y * pDriver->PixelsPerScanLine + x ];
+
+    return ConvertHwColourToMask( pDriver, HWColour );
+}
+
 static void
 KeDpLfbFillRect(
     DisplayDevice* Device,
