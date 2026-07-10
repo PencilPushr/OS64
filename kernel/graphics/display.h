@@ -16,7 +16,7 @@ typedef struct DisplayOps_t
 {
     void        ( *PutPixel )( struct DisplayDevice * Device, uint32_t x, uint32_t y, uint32_t Colour );
     uint32_t    ( *GetPixel )( struct DisplayDevice * Device, uint32_t x, uint32_t y );
-    void        ( *DrawRect )( struct DisplayDevice * Device, uint32_t x, uint32_t y, uint32_t w, uint32_t h, uint32_t Colour );
+    void        ( *FillRect )( struct DisplayDevice * Device, uint32_t x, uint32_t y, uint32_t w, uint32_t h, uint32_t Colour );
 } IDisplayOps;
 
 typedef struct DisplayDevice_t

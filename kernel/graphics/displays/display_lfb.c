@@ -1,12 +1,15 @@
 // kernel/displays/display_lfb.c
 
 #include "kernel/graphics/display.h"
-#include <cstdint>
+#include <stdint.h>
 #include "display_lfb.h"
 
 typedef struct LFBData_t
 {
     volatile uint32_t * pFrameBuffer;
+
+    uint32_t Width;
+    uint32_t Height;
     
     // Copy of DisplayDevice internals
     uint32_t PitchBytes; // pixels per scanline ( pitch / 4 )
@@ -61,7 +64,7 @@ inline
 uint32_t 
 ConvertMaskToHwColour(
     LFBData* pLinearFrameBuffer,
-    uin32_t XRGBFormat
+    uint32t_t XRGBFormat
 )
 {
     uint8_t R = ( XRGBFormat >> 16) & 0xFF;
@@ -80,7 +83,7 @@ inline
 uint32_t
 ConvertHwColourToMask(
     LFBData* pLinearFrameBuffer,
-    uin32_t HWFormat
+    uint32_t HWFormat
 )
 {
     uint8_t R = ( HWFormat >> pLinearFrameBuffer->RedShift   ) & 0xFF;
@@ -98,7 +101,7 @@ ConvertHwColourToMask(
 //
 
 static void
-KeDpPutPixel(
+KeDpLfbPutPixel(
     DisplayDevice * Device,
     uint32_t x,
     uint32_t y,
@@ -118,8 +121,8 @@ KeDpPutPixel(
 }
 
 static void
-KeDpFillRect(
-    DispayDevice* Device,
+KeDpLfbFillRect(
+    DisplayDevice* Device,
     uint32_t x,
     uint32_t y,
     uint32_t w,
@@ -157,7 +160,7 @@ KeDpFillRect(
     {
         volatile uint32_t* Dst = pDriver->pFrameBuffer + ( y + row ) * pDriver->PixelsPerScanLine + x;
 
-        for( uint32_t column = 0; column < w; column++ )
+        for( uint32_t col = 0; col < w; col++ )
         {
             Dst[ col ] = HwColour;
         }
@@ -165,7 +168,7 @@ KeDpFillRect(
 }
 
 static void
-KeDpDrawRect(
+KeDpLfbDrawRect(
     uint32_t x,
     uint32_t y,
     uint32_t w,
@@ -176,6 +179,17 @@ KeDpDrawRect(
 {
     if ( w == 0 || h == 0 || Thickness == 0 )
 
+    if ( Thickness * 2 > w )
+        Thickness = ( w + 1 ) / 2;
+        
+    if ( Thickness * 2 > h )
+        Thickness = ( w + 1 ) / 2;
+
+    // Draw top, bottom, left and right with FillRect
+
+    // KeDpLfbFillRect( DisplayDevice, x, y, w, Thickness, Colour );
+    // KeDpLfbFillRect( DisplayDevice, x, y + h - Thickness, w, Thickness, Colour ); // Move down by height and up by thickness amount (remember we draw top left to bottom right )
+    // KeDpLfbFillRect( DisplayDevice, x, y + thickness, )
 }
 
 // Todo: Forward declare the functions so they can go on the top. Then move g_LFBOps just below.

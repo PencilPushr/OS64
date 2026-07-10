@@ -2,7 +2,6 @@
 
 GLOBAL_STATUS
 KeGfxDrawRect(
-    IN GOP_FRAMEBUFFER_DESCRIPTOR* pFrameBufferDesc,
     IN uint32_t x,
     IN uint32_t y,
     IN uint32_t w,
@@ -10,39 +9,30 @@ KeGfxDrawRect(
     IN uint32_t Colour
 )
 {
-    if ( !pFrameBufferDesc )
-        return STATUS_FRAMEBUFFER_WAS_NULL;
-    
-    uint32_t* Pixels = (uint32_t *)pFrameBufferDesc->Base;
-    int PixelsPerScanLine = pFrameBufferDesc->Pitch / 4;
+    DisplayDevice* Device = KeDpGetDevice();
+    if ( !Device )
+        return STATUS_INVALID_ARGUMENT; // Todo: fix this, make a a failed status code when getting driver (bit more generic than graphics related)
 
-    for( uint32_t Row = y; Row < y + h && Row < pFrameBufferDesc->Height; Row++ )
-    {
-        for( uint32_t Col = x; Col < x + w && Col < pFrameBufferDesc->Width; Col++ )
-        {
-            Pixels[ Row * PixelsPerScanLine + Col ] = Colour;
-        }
-    }
+    Device->DisplayOps->FillRect( Device, x, y, w, h, Colour);
 
     return OK;
 }
 
 GLOBAL_STATUS
 KeGfxFillScreen(
-    IN GOP_FRAMEBUFFER_DESCRIPTOR* pFrameBufferDesc,
     IN uint32_t Colour
 )
 {
     GLOBAL_STATUS Status = KeGfxDrawRect(
-        pFrameBufferDesc,
+        Device,
         0,
         0,
-        pFrameBufferDesc->Width,
-        pFrameBufferDesc->Height,
+        Device->Width,
+        Device->Height,
         Colour
     );
 
     return Status;
 }
 
-GLOBAL
+//GLOBAL

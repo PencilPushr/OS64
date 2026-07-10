@@ -122,7 +122,7 @@ DrawRect(
         return STATUS_FRAMEBUFFER_WAS_NULL;
     
     uint32_t* Pixels = (uint32_t *)pFrameBufferDesc->Base;
-    int PixelsPerScanLine = pFrameBufferDesc->Pitch / 4;
+    uint32_t PixelsPerScanLine = pFrameBufferDesc->PixelsPerScanLine;
 
     // 21/05/2026 - Colour fix: note this is inefficient - MaskToShift walks bits everytime ConvertColour is called
     //                          Ideally - compute the shifts once during init and store them in a variable. 

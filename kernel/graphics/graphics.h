@@ -1,11 +1,11 @@
 #ifndef KERNEL_GRAPHICS_H
 #define KERNEL_GRAPHICS_H
 
-
+#include "display.h"
 
 GLOBAL_STATUS
 KeGfxDrawRect(
-    IN GOP_FRAMEBUFFER_DESCRIPTOR* pFrameBufferDesc,
+    IN DisplayDevice* Device,
     IN uint32_t x,
     IN uint32_t y,
     IN uint32_t w,
@@ -15,7 +15,7 @@ KeGfxDrawRect(
 
 GLOBAL_STATUS
 KeGfxFillScreen(
-    IN GOP_FRAMEBUFFER_DESCRIPTOR* pFrameBufferDesc,
+    IN DisplayDevice* Device,
     IN uint32_t Colour
 );
 
