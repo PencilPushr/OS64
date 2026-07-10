@@ -8,7 +8,7 @@ struct DisplayDevice;
 typedef struct DisplayModeOps_t
 {
     int         ( *GetMode )( struct DisplayDevice * Device, struct DisplayMode * Mode );
-    int         ( *SetMode )( struct DisplayDevice * Device, )
+    int         ( *SetMode )( struct DisplayDevice * Device, struct DisplayMode * Mode );
 } IDisplayModeOps;
 
 // Interface - display backend must provide this
@@ -28,8 +28,10 @@ typedef struct DisplayDevice_t
 
     uint32_t Width;
     uint32_t Height;
-    uint32_t Pitch;
-    uin32_t bpp;
+
+    uint32_t PitchBytes;
+    uint32_t PixelsPerScanLine;
+    uint32_t Bpp;
 
     void* DriverSpecific;
 } DisplayDevice;

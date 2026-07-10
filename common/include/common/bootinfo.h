@@ -8,11 +8,13 @@ typedef struct GOP_FRAMEBUFFER_DESCRIPTOR
     uint64_t Base;
     uint32_t Width;
     uint32_t Height;
-    uint32_t Pitch;
+    uint32_t PitchBytes;
+    uint32_t PixelsPerScanLine;
     uint32_t RedMask;
     uint32_t GreenMask;
     uint32_t BlueMask;
     uint32_t RSVDMask;
+    
     uint8_t  Bpp;
     uint8_t  _pad[3];
 

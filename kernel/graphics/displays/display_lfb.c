@@ -6,10 +6,16 @@
 
 typedef struct LFBData_t
 {
-    uint32_t * pFrameBuffer;
+    volatile uint32_t * pFrameBuffer;
     
     // Copy of DisplayDevice internals
-    uint32_t Pitch; // pixels per scanline ( pitch / 4 )
+    uint32_t PitchBytes; // pixels per scanline ( pitch / 4 )
+    uint32_t PixelsPerScanLine; 
+    uint32_t Bpp;
+
+    uint32_t RedMask;
+    uint32_t GreenMask;
+    uint32_t BlueMask;
 
     // XRGB format conversion <-> hardware format
     uint8_t RedShift;
@@ -35,12 +41,17 @@ MaskToShift(
     IN uint32_t Mask
 )
 {
-    if (Mask == 0) return 0;
+    if (Mask == 0) 
+        return 0;
+
     uint8_t Shift = 0;
-    while ((Mask & 1) == 0) {
+
+    while ((Mask & 1u) == 0) 
+    {
         Mask >>= 1;
         Shift++;
     }
+
     return Shift;
 }
 
@@ -90,15 +101,143 @@ static void
 KeDpPutPixel(
     DisplayDevice * Device,
     uint32_t x,
-    uint32_t y
+    uint32_t y,
     uint32_t Colour
 )
 {
-    LFBData * pDriver = Device->Private;
+    LFBData * pDriver = Device->DriverSpecific;
 
     // Bounds check - Can't write beyond framebuffer and shouldn't...
-    if ( x >= pDriver->Width || y >= pDriver->Height ) return; // TODO: Return global status? this seems alarming that you are attempting to write beyond what's available.
+    if ( x >= pDriver->Width || y >= pDriver->Height ) // TODO: Return global status? this seems alarming that you are attempting to write beyond what's available.
+        return;
 
-    pDriver->pFrameBuffer[ y * pDriver->PixelsPerScanLine  + x ] = ConvertMaskToHwColour( pDriver->pFrameBuffer, Colour );
+    uint32_t HwColour = ConvertMaskToHwColour( pDriver, Colour );
+
+    pDriver->pFrameBuffer[ y * pDriver->PixelsPerScanLine  + x ] = HwColour;
+
+}
+
+static void
+KeDpFillRect(
+    DispayDevice* Device,
+    uint32_t x,
+    uint32_t y,
+    uint32_t w,
+    uint32_t h,
+    uint32_t Colour
+)
+{
+    LFBData * pDriver = Device->DriverSpecific;
+
+    if ( w == 0 || h == 0 )
+        return;
+
+    // No clipping check for up and left bounds:
+    //
+    //          v
+    //          ____
+    //     >   |                but             |  <
+    //         |                            ____|
+    //                  
+    //                                         ^
+    //  Left and Up are impossible to clip unless overflowed due to unsigned: x or y != < 0
+    //  But right and bottom are possible to overflow and write into nothingness/overflow. 
+    //  So we just clamp it.
+
+
+    if ( w > pDriver->Width - x )
+        w = pDriver->Width - x;
+
+    if ( h > pDriver->Height - y )
+        h = pDriver->Height - y;
+
+    uint32_t HwColour = ConvertMaskToHwColour( pDriver, Colour );
+
+    for( uint32_t row = 0; row < h; row++ )
+    {
+        volatile uint32_t* Dst = pDriver->pFrameBuffer + ( y + row ) * pDriver->PixelsPerScanLine + x;
+
+        for( uint32_t column = 0; column < w; column++ )
+        {
+            Dst[ col ] = HwColour;
+        }
+    }
+}
+
+static void
+KeDpDrawRect(
+    uint32_t x,
+    uint32_t y,
+    uint32_t w,
+    uint32_t h,
+    uint32_t Thickness,
+    uint32_t Colour
+)
+{
+    if ( w == 0 || h == 0 || Thickness == 0 )
+
+}
+
+// Todo: Forward declare the functions so they can go on the top. Then move g_LFBOps just below.
+static const IDisplayOps g_LFBOps =
+{
+    .PutPixel = KeDpLfbPutPixel,
+    .GetPixel = KeDpLfbGetPixel,
+    .FillRect = KeDpLfbFillRect,
+};
+
+#define BPP_HARD32
+
+GLOBAL_STATUS
+KeDpInitLFB(
+    IN GOP_FRAMEBUFFER_DESCRIPTOR * FrameBufferDesc
+)
+{
+    if ( FrameBufferDesc == NULL )
+        return GLOBAL_STATUS_INVALID_PARAMETER;
+
+        if (FrameBufferDesc->Base == 0)
+        return GLOBAL_STATUS_INVALID_PARAMETER;
+
+#ifdef BPP_HARD32 // This only exists because for now we only support 32 bit pixels format - change when we want to support 24 or 16
+
+    if (FrameBufferDesc->Bpp != 32)
+        return GLOBAL_STATUS_UNSUPPORTED;
+
+#endif
+
+    g_LFBData.pFrameBuffer = (volatile uint32_t *)(uintptr_t)FrameBufferDesc->Base;
+
+    g_LFBData.Width  = FrameBufferDesc->Width;
+    g_LFBData.Height = FrameBufferDesc->Height;
+    g_LFBData.Bpp    = FrameBufferDesc->Bpp;
+
+    g_LFBData.PitchBytes = FrameBufferDesc->PitchBytes;
+    g_LFBData.PixelsPerScanLine = FrameBufferDesc->PixelsPerScanLine;
+
+    g_LFBData.RedMask   = FrameBufferDesc->RedMask;
+    g_LFBData.GreenMask = FrameBufferDesc->GreenMask;
+    g_LFBData.BlueMask  = FrameBufferDesc->BlueMask;
+
+    g_LFBData.RedShift   = MaskToShift(FrameBufferDesc->RedMask);
+    g_LFBData.GreenShift = MaskToShift(FrameBufferDesc->GreenMask);
+    g_LFBData.BlueShift  = MaskToShift(FrameBufferDesc->BlueMask);
+
+    g_LFBDisplayDevice.Name = "lfb";
+
+    g_LFBDisplayDevice.DisplayOps = &g_LFBOps;
+
+    g_LFBDisplayDevice.Width  = FrameBufferDesc->Width;
+    g_LFBDisplayDevice.Height = FrameBufferDesc->Height;
+    g_LFBDisplayDevice.Bpp    = FrameBufferDesc->Bpp;
+
+    g_LFBDisplayDevice.PitchBytes = FrameBufferDesc->PitchBytes;
+    g_LFBDisplayDevice.PixelsPerScanLine = FrameBufferDesc->PixelsPerScanLine;
+
+    g_LFBDisplayDevice.DriverSpecific = &g_LFBData;
+
+    KeDpSetDevice(&g_LFBDisplayDevice);
+
+    return GLOBAL_STATUS_SUCCESS;
 
 }

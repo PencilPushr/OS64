@@ -63,8 +63,10 @@ BlGfxInitialiseFrameBuffer(
     pFrameBuffer->Base   = Gop->Mode->FrameBufferBase;
     pFrameBuffer->Width  = Gop->Mode->Info->HorizontalResolution;
     pFrameBuffer->Height = Gop->Mode->Info->VerticalResolution;
-    pFrameBuffer->Pitch  = Gop->Mode->Info->PixelsPerScanLine * 4;
     pFrameBuffer->Bpp    = 32;
+
+    pFrameBuffer->PixelsPerScanLine = Gop->Mode->Info->PixelsPerScanLine;
+    pFrameBuffer->PitchBytes        = Gop->Mode->Info->PixelsPerScanLine * 4;
 
     Print( L"Framebuffer: " );
     Print( L"%d", pFrameBuffer->Width );

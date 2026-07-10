@@ -18,7 +18,7 @@ KeDpSetDevice(
     g_pDisplayDevice = Device;
 }
 
-DisplayDevice 
+DisplayDevice *
 KeDpGetDevice( 
     void 
 )
