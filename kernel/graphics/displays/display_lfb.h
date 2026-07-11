@@ -4,6 +4,7 @@
 #define KERNEL_DISPLAY_LFB_H
 
 #include "common/bootinfo.h"
+#include "common/status_codes.h"
 
 // This is shamelessly an efifb ( linux ) / bootvid.dll ( ms ) rip-off 
 
@@ -11,7 +12,7 @@
 // all the functions are closed off in .c, only exposing the init func here
 GLOBAL_STATUS
 KeDpInitLFB( 
-    IN GOP_FRAMEBUFFER_DESCRIPTOR * pFrameBufferDesc
+    GOP_FRAMEBUFFER_DESCRIPTOR * pFrameBufferDesc
 );
 
 #endif // KERNEL_DISPLAY_LFB_H

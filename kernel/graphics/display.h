@@ -1,22 +1,27 @@
 #ifndef KERNEL_DISPLAY_H
 #define KERNEL_DISPLAY_H
 
+#include <stdint.h>
+
 // Forward declare - the actual struct data is either display.c or a driver file
-struct DisplayDevice;
+struct DisplayDevice_t;
+struct DisplayMode;
 
 // Interface
+
 typedef struct DisplayModeOps_t
 {
-    int         ( *GetMode )( struct DisplayDevice * Device, struct DisplayMode * Mode );
-    int         ( *SetMode )( struct DisplayDevice * Device, struct DisplayMode * Mode );
+    int         ( *GetMode )( struct DisplayDevice_t * Device, struct DisplayMode * Mode );
+    int         ( *SetMode )( struct DisplayDevice_t * Device, struct DisplayMode * Mode );
 } IDisplayModeOps;
+
 
 // Interface - display backend must provide this
 typedef struct DisplayOps_t
 {
-    void        ( *PutPixel )( struct DisplayDevice * Device, uint32_t x, uint32_t y, uint32_t Colour );
-    uint32_t    ( *GetPixel )( struct DisplayDevice * Device, uint32_t x, uint32_t y );
-    void        ( *FillRect )( struct DisplayDevice * Device, uint32_t x, uint32_t y, uint32_t w, uint32_t h, uint32_t Colour );
+    void        ( *PutPixel )( struct DisplayDevice_t * Device, uint32_t x, uint32_t y, uint32_t Colour );
+    uint32_t    ( *GetPixel )( struct DisplayDevice_t * Device, uint32_t x, uint32_t y );
+    void        ( *FillRect )( struct DisplayDevice_t * Device, uint32_t x, uint32_t y, uint32_t w, uint32_t h, uint32_t Colour );
 } IDisplayOps;
 
 typedef struct DisplayDevice_t
@@ -43,7 +48,7 @@ typedef struct DisplayDevice_t
 // Warning: Calling this again with an already active input will replace it.
 void
 KeDpSetDevice( 
-    IN OUT DisplayDevice * Device 
+    DisplayDevice * Device 
 );
 
 // Gets the active display device. NULL if no device.

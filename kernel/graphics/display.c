@@ -12,7 +12,7 @@ static DisplayDevice * g_pDisplayDevice = 0;
 
 void 
 KeDpSetDevice( 
-    IN OUT DisplayDevice *Device 
+    DisplayDevice *Device 
 ) 
 {
     g_pDisplayDevice = Device;

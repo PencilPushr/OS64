@@ -1,12 +1,12 @@
-#include "kernel/graphics.h"
+#include "graphics/graphics.h"
 
 GLOBAL_STATUS
 KeGfxDrawRect(
-    IN uint32_t x,
-    IN uint32_t y,
-    IN uint32_t w,
-    IN uint32_t h,
-    IN uint32_t Colour
+    uint32_t x,
+    uint32_t y,
+    uint32_t w,
+    uint32_t h,
+    uint32_t Colour
 )
 {
     DisplayDevice* Device = KeDpGetDevice();
@@ -20,11 +20,15 @@ KeGfxDrawRect(
 
 GLOBAL_STATUS
 KeGfxFillScreen(
-    IN uint32_t Colour
+    uint32_t Colour
 )
 {
+    DisplayDevice* Device = KeDpGetDevice();
+
+    if ( !Device )
+        return STATUS_INVALID_ARGUMENT;
+
     GLOBAL_STATUS Status = KeGfxDrawRect(
-        Device,
         0,
         0,
         Device->Width,
@@ -35,4 +39,5 @@ KeGfxFillScreen(
     return Status;
 }
 
-//GLOBAL
+//GLOBAL_STATUS
+// KeGfxDrawSplash

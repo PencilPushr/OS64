@@ -20,10 +20,9 @@
 #include "font.h"
 #include "status.h"
 #include "status_codes.h"
+#include "string.h"
 
-#include <string.h>     /* memcmp */
-
-_Static_assert(sizeof(PSF2_Header) == 32, "PSF2 header must be 32 bytes");
+_Static_assert( sizeof( PSF2_Header ) == 32, "PSF2 header must be 32 bytes" );
 
 /* 
  * VGA 8x16 Font Data - All 256 CP437 Glyphs
@@ -826,9 +825,9 @@ const uint8_t vga_font_8x16[256 * 16] = {
 };
 
 GLOBAL_STATUS
-FontInitDefault(Font *OutFont)
+FontInitDefault( Font *OutFont )
 {
-    if (!OutFont)
+    if ( !OutFont )
         return STATUS_INVALID_ARGUMENT;
 
     OutFont->GlyphData     = vga_font_8x16;
@@ -864,49 +863,49 @@ FontInitPSF2(
     if (!pData || !OutFont)
         return STATUS_INVALID_ARGUMENT;
 
-    if (Size < sizeof(PSF2_Header))
+    if (Size < sizeof( PSF2_Header ))
         return STATUS_INVALID_PSF2_HEADER;
 
-    const PSF2_Header *Hdr = (const PSF2_Header *)pData;
+    const PSF2_Header *Hdr = ( const PSF2_Header * )pData;
 
 
     static const uint8_t Psf2Magic[4] = PSF2_MAGIC_BYTES;
-    if (memcmp(Hdr->MagicBytes, Psf2Magic, sizeof(Psf2Magic)) != 0)
+    if ( memcmp( Hdr->MagicBytes, Psf2Magic, sizeof( Psf2Magic ) ) != 0 )
         return STATUS_INVALID_PSF2_MAGIC;
 
-    if (Hdr->Version != 0)
+    if ( Hdr->Version != 0 )
         return STATUS_UNSUPPORTED_PSF2_VERSION;
 
-    if (Hdr->HeaderSz < sizeof(PSF2_Header) || Hdr->HeaderSz > Size)
+    if ( Hdr->HeaderSz < sizeof( PSF2_Header ) || Hdr->HeaderSz > Size )
         return STATUS_INVALID_PSF2_HEADER;
 
     /* Sanity-check dimensions. */
-    if (Hdr->Width == 0 || Hdr->Height == 0 || Hdr->Length == 0)
+    if ( Hdr->Width == 0 || Hdr->Height == 0 || Hdr->Length == 0 )
         return STATUS_BAD_PSF2_GLYPH_DATA;
 
-    if (Hdr->Width > PSF2_MAX_WIDTH || Hdr->Height > PSF2_MAX_HEIGHT)
+    if ( Hdr->Width > PSF2_MAX_WIDTH || Hdr->Height > PSF2_MAX_HEIGHT )
         return STATUS_BAD_PSF2_GLYPH_DATA;
 
     /* Overflow-safe total glyph data size. */
-    size_t GlyphsSize = (size_t)Hdr->Length * Hdr->GlyphSz;
-    if (GlyphsSize / Hdr->GlyphSz != Hdr->Length)
+    size_t GlyphsSize = ( size_t )Hdr->Length * Hdr->GlyphSz;
+    if ( GlyphsSize / Hdr->GlyphSz != Hdr->Length )
         return STATUS_PSF2_OVERFLOW;
 
     size_t Needed = (size_t)Hdr->HeaderSz + GlyphsSize;
-    if (Needed < GlyphsSize)          /* addition wrapped around */
+    if ( Needed < GlyphsSize )          /* addition wrapped around */
         return STATUS_PSF2_OVERFLOW;
 
-    if (Size < Needed)
+    if ( Size < Needed )
         return STATUS_BAD_PSF2_GLYPH_DATA;
 
-    OutFont->GlyphData     = (const uint8_t *)pData + Hdr->HeaderSz;
+    OutFont->GlyphData     = ( const uint8_t * )pData + Hdr->HeaderSz;
     OutFont->Width         = Hdr->Width;
     OutFont->Height        = Hdr->Height;
     OutFont->BytesPerGlyph = Hdr->GlyphSz;
-    OutFont->BytesPerRow   = (Hdr->Width + 7u) / 8u;
+    OutFont->BytesPerRow   = ( Hdr->Width + 7u ) / 8u;
     OutFont->NumGlyphs     = Hdr->Length;
 
-    if (Hdr->Flags & PSF2_FLAG_UNICODE)
+    if ( Hdr->Flags & PSF2_FLAG_UNICODE )
         OutFont->UnicodeTable = OutFont->GlyphData + GlyphsSize;
     else
         OutFont->UnicodeTable = NULL;
@@ -921,11 +920,11 @@ FontInitPSF2(
 * otherwise glyph 0 (typically blank / missing-glyph symbol).
 */
 const uint8_t *
-FontGetGlyph(const Font *pFont, uint32_t Codepoint)
+FontGetGlyph( const Font *pFont, uint32_t Codepoint )
 {
     if (Codepoint >= pFont->NumGlyphs)
     {
-        if ('?' < pFont->NumGlyphs)
+        if ( '?' < pFont->NumGlyphs )
             Codepoint = '?';
         else
             Codepoint = 0;

@@ -1,8 +1,10 @@
 // kernel/displays/display_lfb.c
 
-#include "kernel/graphics/display.h"
-#include <stdint.h>
 #include "display_lfb.h"
+
+#include "graphics/display.h"
+#include <stdint.h>
+#include <stddef.h>
 
 typedef struct LFBData_t
 {
@@ -41,7 +43,7 @@ static DisplayDevice g_LFBDisplayDevice;
  */
 static uint8_t
 MaskToShift(
-    IN uint32_t Mask
+    uint32_t Mask
 )
 {
     if (Mask == 0) 
@@ -64,7 +66,7 @@ inline
 uint32_t 
 ConvertMaskToHwColour(
     LFBData* pLinearFrameBuffer,
-    uint32t_t XRGBFormat
+    uint32_t XRGBFormat
 )
 {
     uint8_t R = ( XRGBFormat >> 16) & 0xFF;
@@ -164,6 +166,8 @@ KeDpLfbFillRect(
     //  But right and bottom are possible to overflow and write into nothingness/overflow. 
     //  So we just clamp it.
 
+    if ( x >= pDriver->Width || y >= pDriver->Height ) // Just realised I never completed what I was talking about underflowing and rolling to max
+        return;
 
     if ( w > pDriver->Width - x )
         w = pDriver->Width - x;
@@ -184,6 +188,7 @@ KeDpLfbFillRect(
     }
 }
 
+/*
 static void
 KeDpLfbDrawRect(
     uint32_t x,
@@ -208,6 +213,7 @@ KeDpLfbDrawRect(
     // KeDpLfbFillRect( DisplayDevice, x, y + h - Thickness, w, Thickness, Colour ); // Move down by height and up by thickness amount (remember we draw top left to bottom right )
     // KeDpLfbFillRect( DisplayDevice, x, y + thickness, )
 }
+*/
 
 // Todo: Forward declare the functions so they can go on the top. Then move g_LFBOps just below.
 static const IDisplayOps g_LFBOps =
@@ -221,19 +227,19 @@ static const IDisplayOps g_LFBOps =
 
 GLOBAL_STATUS
 KeDpInitLFB(
-    IN GOP_FRAMEBUFFER_DESCRIPTOR * FrameBufferDesc
+    GOP_FRAMEBUFFER_DESCRIPTOR * FrameBufferDesc
 )
 {
     if ( FrameBufferDesc == NULL )
-        return GLOBAL_STATUS_INVALID_PARAMETER;
+        return STATUS_INVALID_ARGUMENT;
 
-        if (FrameBufferDesc->Base == 0)
-        return GLOBAL_STATUS_INVALID_PARAMETER;
+    if (FrameBufferDesc->Base == 0)
+        return STATUS_INVALID_ARGUMENT;
 
 #ifdef BPP_HARD32 // This only exists because for now we only support 32 bit pixels format - change when we want to support 24 or 16
 
     if (FrameBufferDesc->Bpp != 32)
-        return GLOBAL_STATUS_UNSUPPORTED;
+        return STATUS_NOT_IMPLEMENTED;
 
 #endif
 
@@ -255,8 +261,8 @@ KeDpInitLFB(
     g_LFBData.BlueShift  = MaskToShift(FrameBufferDesc->BlueMask);
 
     g_LFBDisplayDevice.Name = "lfb";
-
     g_LFBDisplayDevice.DisplayOps = &g_LFBOps;
+    g_LFBDisplayDevice.ModeOps = NULL;
 
     g_LFBDisplayDevice.Width  = FrameBufferDesc->Width;
     g_LFBDisplayDevice.Height = FrameBufferDesc->Height;
@@ -269,6 +275,6 @@ KeDpInitLFB(
 
     KeDpSetDevice(&g_LFBDisplayDevice);
 
-    return GLOBAL_STATUS_SUCCESS;
+    return OK;
 
 }
