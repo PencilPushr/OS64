@@ -3,11 +3,17 @@
 
 #include <stdint.h>
 
+//
+// Interrupt vector froms 0 to 31 are reserved for predefined exceptions and interrupts.
+// Each IDT entry (or gate) holds base address, access flags and segment selector for the interrupt handler.
+// Address holds the virtual address of the interrupt service function, ISR, and is what the processor calls for the specific interrupt. 
+// 
+
 // 
 // Based on intel sdm Vol.3A Chapter 7 
 //
 
-#define IDT_MAX_VECTORS 255
+#define IDT_MAX_VECTORS 256
 
 //
 // Intel Sdm Vol.3A Chapter 7.14.1
@@ -15,16 +21,29 @@
 //
 typedef struct _IDT_INTERRUPT_TRAP_GATE
 {
-    uint16_t LowOffet;          // [15:0]   
+    uint16_t LowOffset;         // [15:0]   
     uint16_t SegmentSelector;   // [31:16]
     uint8_t  IstOffset;         // [39:32]     Interrupt stack table offset ( when clear dont switch )
     uint8_t  Attributes;        // [47:40]
-    uint16_t MiOffset;          // [63:48]
+    uint16_t MidOffset;         // [63:48]
 
     uint32_t HiOffset;          // [31:0]
     uint32_t _Reserved;         // [63:32]
 
 } __attribute__((packed)) IDT_INTERRUPT_TRAP_GATE;
 
+static_assert(sizeof(IDT_INTERRUPT_TRAP_GATE) == 16, "IDT_INTERRUPT_TRAP_GATE size is not 16 bytes");
+
+typedef struct _IDT_DESCRIPTOR
+{
+    uint16_t Limit;             // [15:0]   Size of the IDT in bytes - 1  (should be aligned to 8 bytes - 1)
+    uint64_t Base;              // [63:0]   Base address of the IDT
+
+} __attribute__((packed)) IDT_DESCRIPTOR;
+
+static_assert(sizeof(IDT_DESCRIPTOR) == 10, "IDT_DESCRIPTOR size is not 10 bytes");
+
+extern void _load_idt( IDT_DESCRIPTOR* IdtDescriptor );
+#define LoadIDT( IdtDescriptor ) (_load_idt( IdtDescriptor ))
 
 #endif // ! ARCH_X64_INTERRUPTS_H

@@ -11,12 +11,11 @@
 //  rdi - a pointer to the idt descriptor to be used
 //
 
-.global load_idt
-.type load_idt, @function
-load_idt:
+.global _load_idt
+.type _load_idt, @function
+_load_idt:
     lidt (%rdi)
     ret
-.size load_idt, . - load_idt
-
+.size _load_idt, . - _load_idt
 
 
