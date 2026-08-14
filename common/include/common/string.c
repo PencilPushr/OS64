@@ -38,7 +38,7 @@ memcmp(
         ret
 */
 
-void
+void *
 memcpy(
     void * restrict Dst,
     const void * restrict Src,
