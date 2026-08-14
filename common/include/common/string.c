@@ -10,7 +10,7 @@ memcmp(
     register const uint8_t* S1 = ( const uint8_t * ) Str1;
     register const uint8_t* S2 = ( const uint8_t * ) Str2;
 
-    while (Count-- > 0)
+    while ( Count-- > 0 )
     {
         if (*S1++ != *S2++)
             return S1[-1] < S2[-1] ? -1 : 1;
@@ -40,30 +40,71 @@ memcmp(
 
 void
 memcpy(
-    void* Src,
-    void* Dst,
+    void * restrict Dst,
+    const void * restrict Src,
     size_t Size
 )
 {
-    if ( Src > Dst ) // In front of Dst -> copy forwards
+    uint8_t* D = ( uint8_t * ) Dst;
+    const uint8_t* S = ( const uint8_t * ) Src;
+
+    while ( Size-- )
     {
-        const uint8_t * S = ( const uint8_t * ) Src;
-        uint8_t * D = ( uint8_t * ) Dst;
-        
+        *D++ = *S++;
+    }
+
+    return Dst;
+
+}
+
+void *
+memmove(
+    void *Dst,
+    const void *Src,
+    size_t Size
+)
+{
+    uint8_t* D = ( uint8_t * ) Dst;
+    const uint8_t* S = ( const uint8_t * ) Src;
+
+    if ( D == S || Size == 0 )
+        return Dst;
+
+    if ( S > D )    // Src ahead of Dst -> writes trail reads -> forward is safe
+    {
         while ( Size-- )
         {
             *D++ = *S++;
         }
-        
     }
-    else
+    else            // Dst ahead of Src -> forward would write to unread Src -> backward
     {
-        const uint8_t * Sback = ( const uint8_t * ) Src + ( Size - 1 );
-        uint8_t * Dback = ( uint8_t * ) Dst + ( Size - 1);
+        D += Size - 1;
+        S += Size - 1;
 
         while ( Size-- )
         {
-            *Dback-- = *Sback--;
+            *D-- = *S--;
         }
     }
+
+    return Dst;
+}
+
+void *
+memset(
+    void *Dst,
+    int Value,
+    size_t Size
+)
+{
+    uint8_t* D      = ( uint8_t * ) Dst;
+    const uint8_t V = ( uint8_t ) Value;
+
+    while ( Size-- )
+    {
+        *D++ = V;
+    }
+
+    return Dst;
 }
