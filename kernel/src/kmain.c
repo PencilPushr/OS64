@@ -14,14 +14,13 @@ KMAIN_ENTRY( kmain, BootInfo )
     GLOBAL_STATUS Status = STATUS_ERROR;
     InitialiseInterrupts();
 
-
     char WriteToPort[] = "init\0";
     SerialWriteEx( 0xE9, ARRAY_LENGTH( WriteToPort ), (uint8_t*)WriteToPort );
 
-    *(volatile uint8_t*)0x7FFFFFFF = 0;
+    __asm__ volatile("int $0x0E" );
 
-    char p[] = "faulted?\0";
-    SerialWriteEx( 0xE9, ARRAY_LENGTH( p ), (uint8_t*)p );
+    char c[] = "faulted maybe?\0";
+    SerialWriteEx( 0xE9, ARRAY_LENGTH( c ), (uint8_t*)c );
 
     return 0xC1A;
 }

@@ -27,7 +27,8 @@ QEMU_FLAGS := \
     -net none \
     -d int \
     -D $(OVMF_DIR)/dbg.log \
-	-debugcon stdio 
+	-debugcon stdio \
+	-no-reboot
 
 # --- targets ---
 

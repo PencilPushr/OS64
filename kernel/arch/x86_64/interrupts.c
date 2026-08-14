@@ -13,14 +13,12 @@ void IDTPageFaultHandler( void )
     __asm__ volatile( "iretq" );
 }
 
-
 void IDTServiceHandler( void )
 {
     char WriteToPort[] = "service fault\0";
     SerialWriteEx( 0xE9, ARRAY_LENGTH( WriteToPort ), (uint8_t*)WriteToPort );
     __asm__ volatile( "iretq" );
 }
-
 
 void 
 SetIDTEntry( 

@@ -46,4 +46,42 @@ static_assert(sizeof(IDT_DESCRIPTOR) == 10, "IDT_DESCRIPTOR size is not 10 bytes
 extern void _load_idt( IDT_DESCRIPTOR* IdtDescriptor );
 #define LoadIDT( IdtDescriptor ) (_load_idt( IdtDescriptor ))
 
+// idea i stole from https://forum.osdev.org/viewtopic.php?t=58001 where he pushes saved registers on the stack (and error codes/iret but thats implicit) and passes rsp to
+// function that is handling the interrupt :)
+typedef struct _INTERRUPT_STACK_STATE
+{
+    // Segment registers
+    uint64_t Gs;
+    uint64_t Fs;
+    uint64_t Es;
+    uint64_t Ds;
+
+     // General purpose registers
+    uint64_t Rax;
+    uint64_t Rbx;
+    uint64_t Rcx;
+    uint64_t Rdx;
+    uint64_t Rbp;
+    uint64_t Rdi;
+    uint64_t Rsi;
+    uint64_t R9;
+    uint64_t R10;
+    uint64_t R11;
+    uint64_t R12;
+    uint64_t R13;
+    uint64_t R14;
+    uint64_t R15;
+
+    uint64_t InterruptVector;
+    uint64_t ErrorCode;
+
+    // Extra data pushed for iret implicitly 
+    uint64_t IretRip;
+    uint64_t IretCs;
+    uint64_t IretRFlags;
+    uint64_t IretRsp;
+    uint64_t IrsetRsp;
+
+} __attribute__((packed)) INTERRUPT_STACK_STATE;
+
 #endif // ! ARCH_X64_INTERRUPTS_H
