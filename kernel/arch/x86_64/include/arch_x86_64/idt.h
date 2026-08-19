@@ -46,6 +46,11 @@ static_assert(sizeof(IDT_DESCRIPTOR) == 10, "IDT_DESCRIPTOR size is not 10 bytes
 extern void _load_idt( IDT_DESCRIPTOR* IdtDescriptor );
 #define LoadIDT( IdtDescriptor ) (_load_idt( IdtDescriptor ))
 
+#define INTERRUPT_ERROR_EXTERNAL_EVENT( ErrorCode )      ( (uint64_t)ErrorCode & 0ull )
+#define INTERRUPT_ERROR_DESCIRPTOR_LOCATION( ErrorCode ) ( ((uint64_t)ErrorCode >> 1) & 0ull )
+#define INTERRUPT_ERROR_DESCRIPTOR_TABLE( ErrorCode )    ( ((uint64_t)ErrorCode >> 2) & 0ull )
+#define INTERRPT_ERROR_SEGMENT_SELECTOR( ErrorCode )     ( ((uint32_t)ErrorCode << 16) >> 19 )
+
 // idea i stole from https://forum.osdev.org/viewtopic.php?t=58001 where he pushes saved registers on the stack (and error codes/iret but thats implicit) and passes rsp to
 // function that is handling the interrupt :)
 typedef struct _INTERRUPT_STACK_STATE
@@ -64,6 +69,7 @@ typedef struct _INTERRUPT_STACK_STATE
     uint64_t Rbp;
     uint64_t Rdi;
     uint64_t Rsi;
+    uint64_t R8;
     uint64_t R9;
     uint64_t R10;
     uint64_t R11;
@@ -75,13 +81,46 @@ typedef struct _INTERRUPT_STACK_STATE
     uint64_t InterruptVector;
     uint64_t ErrorCode;
 
-    // Extra data pushed for iret implicitly 
+    // Extra data pushed for iretq implicitly 
     uint64_t IretRip;
     uint64_t IretCs;
     uint64_t IretRFlags;
     uint64_t IretRsp;
-    uint64_t IrsetRsp;
+    uint64_t IretSs;
 
 } __attribute__((packed)) INTERRUPT_STACK_STATE;
+
+extern void _interrupt_service_routine0();
+extern void _interrupt_service_routine1();
+extern void _interrupt_service_routine2();
+extern void _interrupt_service_routine3();
+extern void _interrupt_service_routine4();
+extern void _interrupt_service_routine5();
+extern void _interrupt_service_routine6();
+extern void _interrupt_service_routine7();
+extern void _interrupt_service_routine8();
+extern void _interrupt_service_routine9();
+extern void _interrupt_service_routine10();
+extern void _interrupt_service_routine11();
+extern void _interrupt_service_routine12();
+extern void _interrupt_service_routine13();
+extern void _interrupt_service_routine14();
+extern void _interrupt_service_routine15();
+extern void _interrupt_service_routine16();
+extern void _interrupt_service_routine17();
+extern void _interrupt_service_routine18();
+extern void _interrupt_service_routine19();
+extern void _interrupt_service_routine20();
+extern void _interrupt_service_routine21();
+extern void _interrupt_service_routine22();
+extern void _interrupt_service_routine23();
+extern void _interrupt_service_routine24();
+extern void _interrupt_service_routine25();
+extern void _interrupt_service_routine26();
+extern void _interrupt_service_routine27();
+extern void _interrupt_service_routine28();
+extern void _interrupt_service_routine29();
+extern void _interrupt_service_routine30();
+extern void _interrupt_service_routine31();
 
 #endif // ! ARCH_X64_INTERRUPTS_H
