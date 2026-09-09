@@ -37,7 +37,11 @@ kmain(
     if ( FAILED( Status ) )
         goto pause;
 
-    /* First direct glyph test: proves Font -> KeGfx -> DisplayOps -> LFB. */
+    /* First direct glyph test: proves Font -> KeGfx -> DisplayOps -> LFB. 
+    *  [09/09/2026 09:09] Bit nonesensical, if we can set a pixel and thus
+    *     the whole screen, the only reason glyph drawing would fail is
+    *     by a software/logic error.
+    */
     Status = KeGfxFillScreen( 0x00101010u );
 
     if ( FAILED( Status ) )
@@ -58,6 +62,8 @@ kmain(
     /*
      * Console starts one glyph row lower so the standalone 'A' remains
      * visible as a diagnostic while bringing up the console.
+     * [09/09/2026 09:09] Again, a simple print test would suffice.
+     *    Consider removing the 'A' test.
      */
     Status = KeConsoleInit(
         &g_KernelConsole,
