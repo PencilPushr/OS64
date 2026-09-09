@@ -50,8 +50,14 @@ typedef struct Font_t
 GLOBAL_STATUS FontInitDefault(Font *OutFont);
 GLOBAL_STATUS FontInitPSF2(Font *OutFont, const void *pData, size_t Size);
 
+const uint8_t *
+FontGetGlyph(
+    const Font *pFont,
+    uint32_t Codepoint
+);
 
-// Direct access to the built-in VGA 8x16 font data (256 glyphs × 16 bytes)
+
+// Built-in VGA 8x16 font (256 glyphs × 16 bytes)
 extern const uint8_t vga_font_8x16[256 * 16];
  
 #define VGA_FONT_WIDTH          8
